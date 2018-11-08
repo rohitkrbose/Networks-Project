@@ -6,7 +6,7 @@ class videosocket:
        Size of a packet or whatever is assumed to be less than 100MB
     '''
 
-    def __init__(self , sock=None):
+    def __init__(self, sock=None):
         if sock is None:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         else:
@@ -18,18 +18,21 @@ class videosocket:
     def vsend(self, framestring):
         totalsent = 0
         metasent = 0
-        length =len(framestring)
-        lengthstr=str(length).zfill(8)
+        length = len(framestring)
+        print (length)
+        lengthstr = str(length).zfill(8)
 
         while metasent < 8 :
-            sent = self.sock.send(lengthstr[metasent:])
+            # sent = self.sock.send(lengthstr[metasent:])
+            sent = self.sock.send(bytes(lengthstr[metasent:], 'utf-8'))
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
             metasent += sent
         
         
         while totalsent < length :
-            sent = self.sock.send(framestring[totalsent:])
+            # sent = self.sock.send(framestring[totalsent:])
+            sent = self.sock.send(bytes(lengthstr[totalsent:], 'utf-8'))
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
             totalsent += sent
