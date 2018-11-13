@@ -14,14 +14,14 @@ def verify_mail (email,pw):
 	cur.execute(comm)
 	res = cur.fetchall()
 	if (len(res) == 0):
-		print ('User does not exist!')
+		# print ('User does not exist!')
 		return (False)
 	true_pw_hash = res[0][1]
 	# Check if password hashes match
 	hash_obj = hashlib.md5(pw.encode('utf-8'))
 	pw_hash = hash_obj.hexdigest()
 	if (pw_hash != true_pw_hash):
-		print ("Wrong password!")
+		# print ("Wrong password!")
 		return (False)
 	return (True)
 
