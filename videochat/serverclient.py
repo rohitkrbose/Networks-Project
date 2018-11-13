@@ -2,16 +2,18 @@ import socket, videosocket
 from videofeed import VideoFeed
 import threading
 import time
+import StringIO
 
 occupied = False
 zoom = False
+videofeed = VideoFeed(1,"axax",1)
 
 class Server:
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(("", 6000))
         self.server_socket.listen(5)
-        self.videofeed = VideoFeed(1,"server",1)
+        # self.videofeed = VideoFeed(1,"server",1)
         print "TCPServer Waiting for client on port 6000"
 
     def start(self):
@@ -25,24 +27,24 @@ class Server:
             while True:
                 print ('asdasd')
                 frame = vsock.vreceive()
-                self.videofeed.set_frame(frame)
-                frame = self.videofeed.get_frame()
+                videofeed.set_frame(frame)
+                frame = videofeed.get_frame()
                 vsock.vsend(frame)
 
 class Client:
     def __init__(self, ip_addr = "127.0.0.1"):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((ip_addr, 6000))
+        self.client_socket.connect((ip_addr, 6001))
         self.vsock = videosocket.videosocket (self.client_socket)
-        self.videofeed = VideoFeed(1,"client",1)
+        # self.videofeed = VideoFeed(1,"client",1)
         self.data = StringIO.StringIO()
 
     def connect(self):
         while True:
-            frame=self.videofeed.get_frame()
+            frame=videofeed.get_frame()
             self.vsock.vsend(frame)
             frame = self.vsock.vreceive()
-            self.videofeed.set_frame(frame)
+            videofeed.set_frame(frame)
 
 if __name__ == "__main__":
     server = Server()
@@ -51,5 +53,6 @@ if __name__ == "__main__":
     	time.sleep(5)
     	ip_addr = raw_input('Which IP do you want to connect to?\n')
     	if (ip_addr != 'N'):
-	    	client = Client(ip_addr)
-	    	client.connect()
+            thread_server.stop()
+            client = Client(ip_addr)
+            client.connect()
