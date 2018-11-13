@@ -1,8 +1,8 @@
 import socket, videosocket
 from videofeed import VideoFeed
-from threading import Thread
-import time
-import StringIO
+from threading import Thread,Timer
+import Tkinter as tk
+# from Tkinter import messagebox
 
 occupied = False
 haveConnection = False
@@ -19,17 +19,17 @@ class Daemon:
         global haveConnection, U_client_socket, U_address
         while True:
             cs, addr = self.daemon_socket.accept()
-            if (occupied == True):
+            if (haveConnection == True):
             	continue
             haveConnection = True
             U_client_socket = cs; U_address = addr;
             print "I got a connection from ", addr
 
 class Server:
-    def start(self):
+    def connect(self):
         client_socket, address = U_client_socket, U_address
         vsock = videosocket.videosocket(client_socket)
-        videofeed = VideoFeed(1," ",1)
+        videofeed = VideoFeed(1,"A1",1)
         while True:
             frame = vsock.vreceive()
             videofeed.set_frame(frame)
@@ -41,24 +41,48 @@ class Client:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((ip_addr, 6000))
         vsock = videosocket.videosocket (client_socket)
-        videofeed = VideoFeed(1," ",1)
+        videofeed = VideoFeed(1,"A2",1)
         while True:
-            frame=videofeed.get_frame()
-            self.vsock.vsend(frame)
-            frame = self.vsock.vreceive()
+            frame = videofeed.get_frame()
+            vsock.vsend(frame)
+            frame = vsock.vreceive()
             videofeed.set_frame(frame)
 
+class ConstantlyCheck:
+    global haveConnection
+    def start(self):
+        while True:
+            if (haveConnection == True):
+                messagebox.showerror("Error", "Someone wants to talk to you!")
 
-if __name__ == "__main__":
-    daemon = Daemon()
-    thread_daemon = Thread(target=daemon.start)
-    thread_daemon.start()
-    server = Server()
-    client = Client()
-    while (True):
-        if (haveConnection == True): # daemon listened to some shit
-            server.start()
-    	ip_addr = raw_input('Which IP do you want to connect to?\n')
-    	if (ip_addr != 'N'):
-            client = Client()
-            client.connect(ip_addr)
+daemon = Daemon()
+server = Server()
+client = Client()
+CC = ConstantlyCheck()
+
+thread_daemon = Thread(target = daemon.start)
+thread_daemon.start()
+thread_CC = Thread(target = CC.start)
+thread_CC.start()
+
+# Tkinter stuff
+root = tk.Tk()
+root.title("Chat Client")
+win = tk.Toplevel()
+entry_ip = tk.Entry(win) # IP entry
+button_connect = tk.Button(win, text = 'Connect', command = lambda: connectTo) # Connect to IP
+entry_ip.pack(); button_connect.pack();
+root.withdraw()
+root.mainloop()
+
+
+
+
+
+
+
+
+
+# while (True):
+#     if (haveConnection == True): # daemon listened to some shit i.e. someone wants to talk to me
+#         server.connect()
