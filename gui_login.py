@@ -8,8 +8,8 @@ def authenticate_email():
 	email = entry_email.get()
 	pw = entry_pw.get()
 	if (auth.verify_mail(email,pw) == True): # Checks whether username and password are correct
-		win_auth1.destroy() # Removes the email window
-		win_auth2.deiconify() # Unhides the otp window
+		win_auth1.destroy() # Removes email window
+		win_auth2.deiconify() # Unhides OTP window
 		otp = auth.send_OTP(email)
 	else:
 		messagebox.showerror("Error", "Invalid credentials!")
@@ -18,8 +18,8 @@ def authenticate_otp():
 	global window_auth2
 	entered_otp = entry_otp.get()
 	if (otp == entered_otp):
-		win_auth2.destroy()
-		root.deiconify()
+		win_auth2.destroy() # Removes OTP window
+		root.deiconify() # Unhides root window
 	else:
 		messagebox.showerror("Error", "Invalid OTP!")
 
