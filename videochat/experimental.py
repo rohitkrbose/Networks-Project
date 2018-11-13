@@ -2,7 +2,7 @@ import socket, videosocket
 from videofeed import VideoFeed
 from threading import Thread,Timer
 import Tkinter as tk
-# from Tkinter import messagebox
+import tkMessageBox
 
 occupied = False
 haveConnection = False
@@ -39,7 +39,10 @@ class Server:
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((ip_addr, 6000))
+        try:
+            client_socket.connect((ip_addr, 6000))
+        except:
+            return ('Unavailable')
         vsock = videosocket.videosocket (client_socket)
         videofeed = VideoFeed(1,"A2",1)
         while True:
@@ -48,12 +51,20 @@ class Client:
             frame = vsock.vreceive()
             videofeed.set_frame(frame)
 
-class ConstantlyCheck:
-    global haveConnection
+class ConstantlyCheck: # I am the server!
+    global haveConnection, server
     def start(self):
         while True:
             if (haveConnection == True):
-                messagebox.showerror("Error", "Someone wants to talk to you!")
+                print ('Someone wants to talk to you')
+                tkMessageBox.showerror("Error", "Someone wants to talk to you!")
+
+def connectTo():
+    global win, ip, client
+    ip = entry_ip.get()
+    result = client.connect(ip)
+    if (result != None):
+        tkMessageBox.showerror("Error", "Nobody there!")
 
 daemon = Daemon()
 server = Server()
@@ -69,10 +80,12 @@ thread_CC.start()
 root = tk.Tk()
 root.title("Chat Client")
 win = tk.Toplevel()
+ip = ''
 entry_ip = tk.Entry(win) # IP entry
-button_connect = tk.Button(win, text = 'Connect', command = lambda: connectTo) # Connect to IP
+button_connect = tk.Button(win, text = 'Connect', command = lambda: connectTo()) # Connect to IP
 entry_ip.pack(); button_connect.pack();
 root.withdraw()
+
 root.mainloop()
 
 
