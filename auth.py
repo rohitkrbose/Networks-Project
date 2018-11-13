@@ -3,13 +3,12 @@ import hashlib
 import getpass
 import sqlite3
 import smtplib 
+import base64
 import sys
-import time
 
-def verify (email,pw):
+def verify_mail (email,pw):
 	connection = sqlite3.connect("back.db")
 	cur = connection.cursor()
-
 	# Check if exists
 	comm = 'SELECT * FROM USER WHERE email=' + '\"' + email + '\"' 
 	cur.execute(comm)
@@ -18,34 +17,22 @@ def verify (email,pw):
 		print ('User does not exist!')
 		return (False)
 	true_pw_hash = res[0][1]
-
 	# Check if password hashes match
 	hash_obj = hashlib.md5(pw.encode('utf-8'))
 	pw_hash = hash_obj.hexdigest()
 	if (pw_hash != true_pw_hash):
 		print ("Wrong password!")
 		return (False)
+	return (True)
 
+def send_OTP (email):
 	# Send OTP to mail
 	s = smtplib.SMTP('mmtp.iitk.ac.in', 25)
-	z = getpass.getpass('Rohit\'s Password: ')
-	s.login('rohitkb', z)
-	true_otp = str(np.random.randint(10000,100000))
-	s.sendmail('rohitkb@iitk.ac.in', email, true_otp)
+	s.login('rohitkb', base64.b64decode('Vm9ydGV4MTIz').decode("utf-8"))
+	otp = str(np.random.randint(10000,100000))
+	s.sendmail('rohitkb@iitk.ac.in', email, otp)
 	s.quit()
-	now = time.time()
-
-	# Match OTPs
-	otp = input('Enter OTP: ')
-	if (otp == true_otp):
-		print ("Authentication successful!")
-	else:
-		print ("Wrong OTP!")
-		return (False)
-
-	then = time.time()
-	elapsed = then - now
-	return (True)
+	return (otp)
 
 if __name__ == '__main__':
 	email = input("Enter e-mail: ")
