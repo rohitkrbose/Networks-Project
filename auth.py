@@ -28,7 +28,8 @@ def verify (email,pw):
 
 	# Send OTP to mail
 	s = smtplib.SMTP('mmtp.iitk.ac.in', 25)
-	s.login('rohitkb', 'Vortex123')
+	z = getpass.getpass('Rohit\'s Password: ')
+	s.login('rohitkb', z)
 	true_otp = str(np.random.randint(10000,100000))
 	s.sendmail('rohitkb@iitk.ac.in', email, true_otp)
 	s.quit()
