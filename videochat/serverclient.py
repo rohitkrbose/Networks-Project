@@ -41,6 +41,7 @@ class Client:
 
     def connect(self):
         while True:
+            print ('asdasd')
             frame=videofeed.get_frame()
             self.vsock.vsend(frame)
             frame = self.vsock.vreceive()
@@ -49,10 +50,10 @@ class Client:
 if __name__ == "__main__":
     server = Server()
     thread_server = threading.Thread(target=server.start)
+    thread_server.start()
     while (True):
     	time.sleep(5)
     	ip_addr = raw_input('Which IP do you want to connect to?\n')
     	if (ip_addr != 'N'):
-            thread_server.stop()
             client = Client(ip_addr)
             client.connect()
