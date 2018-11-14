@@ -34,7 +34,8 @@ class VideoFeed:
         pil_bytes = io.BytesIO(frame_bytes)
         pil_image = Image.open(pil_bytes)
         cv_image = cv2.cvtColor(numpy.array(pil_image), cv2.COLOR_RGB2BGR)
-        cv2.imshow(self.name, cv_image)
+        # cv2.imshow(self.name, cv_image)
+        return Image.from_array(cv_image)
 
 if __name__=="__main__":
     vf = VideoFeed(1,"test",1)
