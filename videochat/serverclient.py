@@ -1,9 +1,10 @@
 import socket, videosocket
-from videofeed import VideoFeed
+from videofeed1 import VideoFeed
 from threading import Thread,Timer
 import Tkinter as tk
 import tkMessageBox
 import StringIO
+import cv2
 
 haveConnection = False
 videoRunning = True
@@ -35,6 +36,8 @@ class Server:
         quit_win.deiconify()
         try:
             while (videoRunning):
+                if (cv2.waitKey(0) == ord('c')):
+                    break
                 frame = vsock.vreceive()
                 videofeed.set_frame(frame)
                 frame = videofeed.get_frame()
@@ -56,6 +59,8 @@ class Client:
         videofeed = VideoFeed(1,"Client",1)
         try:
             while (videoRunning):
+                if (cv2.waitKey(0) == ord('c')):
+                    break
                 frame = videofeed.get_frame()
                 vsock.vsend(frame)
                 frame = vsock.vreceive()
@@ -102,7 +107,7 @@ button_quit = tk.Button(quit_win, text = 'Quit', command = lambda: changeVideoSt
 button_quit.pack()
 entry_ip.pack(); button_connect.pack();
 root.withdraw()
-quit_win.withdraw()
+# quit_win.withdraw()
 
 root.after(0, constantlyCheck)
 root.mainloop()
