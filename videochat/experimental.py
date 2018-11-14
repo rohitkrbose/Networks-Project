@@ -15,7 +15,7 @@ def closeVideo ():
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6000))
+        self.daemon_socket.bind(("", 6001))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -30,33 +30,42 @@ class Daemon:
             print "I got a connection from ", addr
 
 class Server:
+    global haveConnection, U_client_socket, U_address, end, tk
+    def __init__ (self):
+        self.videofeed = None
+    def show (self):
+        frame = vsock.vreceive()
+        self.videofeed.set_frame(frame)
+        frame = self.videofeed.get_frame()
+        vsock.vsend(frame)
+        if (end == False):
+            tk.after(1,self.show)
     def connect(self):
-        global haveConnection, U_client_socket, U_address, end
         client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
-        vsock = videosocket.videosocket(client_socket) # establish a video connection
-        videofeed = VideoFeed(1,"A1",1)
-        while end == False:
-            frame = vsock.vreceive()
-            videofeed.set_frame(frame)
-            frame = videofeed.get_frame()
-            vsock.vsend(frame)
+        vsock = videosocket.videosocket(client_socket) # establish a video 
+        self.videofeed = VideoFeed(1,"A1",1)
+        self.show()
 
 class Client:
+    global win, end, tk
+    def __init__ (self):
+        self.videofeed = None
+    def show (self):
+        frame = videofeed.get_frame()
+        vsock.vsend(frame)
+        frame = vsock.vreceive()
+        videofeed.set_frame(frame)
+        if (end == False):
+            tk.after(1,self.show)
     def connect(self, ip_addr = "127.0.0.1"):
-        global win, end
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 6001))
+            client_socket.connect((ip_addr, 6000))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
         vsock = videosocket.videosocket (client_socket) # establish a video connection
-        videofeed = VideoFeed(1,"A2",1)
-        while end == False:
-            frame = videofeed.get_frame()
-            vsock.vsend(frame)
-            frame = vsock.vreceive()
-            videofeed.set_frame(frame)
+        self.videofeed = VideoFeed(1,"A2",1)
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
     global haveConnection, server, win
