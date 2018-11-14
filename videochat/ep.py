@@ -4,20 +4,32 @@ from videofeed import VideoFeed
 from threading import Thread,Timer
 import Tkinter as tk
 import tkMessageBox
+import pickle
+from multiprocessing.reduction import ForkingPickler
+import StringIO
+from video_helper import V
 
 haveConnection = False
 U_client_socket = U_address = None
+sock = None
 
-def spawnVideo (sock):
+def forking_dumps(obj):
+    buf = StringIO.StringIO()
+    ForkingPickler(buf).dump(obj)
+    return buf.getvalue()
+
+def spawnVideo ():
+	global sock
 	parent_conn,child_conn = Pipe()
-	parent_conn.send(sock)
+	print (sock)
+	parent_conn.send(forking_dumps(sock))
 	p = Process(target=V, args=(child_conn,))
 	p.start()
 
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6001))
+        self.daemon_socket.bind(("", 7001))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -33,34 +45,22 @@ class Daemon:
 
 class Server:
     def connect(self):
-        global haveConnection, U_client_socket, U_address
+        global haveConnection, U_client_socket, U_address, sock
         client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
-        spawnVideo(client_socket)
-        # vsock = videosocket.videosocket(client_socket) # establish a video connection
-        # videofeed = VideoFeed(1,"A1",1)
-        # while True:
-        #     frame = vsock.vreceive()
-        #     videofeed.set_frame(frame)
-        #     frame = videofeed.get_frame()
-        #     vsock.vsend(frame)
+        sock = client_socket
+        spawnVideo()
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
-        global win
+        global win, sock
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 6000))
+            client_socket.connect((ip_addr, 7000))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
-        spawnVideo(client_socket)
-        # vsock = videosocket.videosocket (client_socket) # establish a video connection
-        # videofeed = VideoFeed(1,"A2",1)
-        # while True:
-        #     frame = videofeed.get_frame()
-        #     vsock.vsend(frame)
-        #     frame = vsock.vreceive()
-        #     videofeed.set_frame(frame)
+        sock = client_socket
+        spawnVideo()
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
     global haveConnection, server, win
