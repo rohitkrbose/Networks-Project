@@ -22,42 +22,36 @@ def close():
 # Window design
 btn_exit = tk.Button(root, text="Quit", command = lambda:close)
 btn_exit.pack()
+root.mainloop()
 
 def V_s_video():
-		global root
-		frame = vsock.vreceive()
-		videofeed.set_frame(frame)
-		frame = videofeed.get_frame()
-		vsock.vsend(frame)
-		if (endVideo == False):
-			root.after(1, V_s_video)
+		global root, endVideo
+		while (endVideo == False):
+			frame = vsock.vreceive()
+			videofeed.set_frame(frame)
+			frame = videofeed.get_frame()
+			vsock.vsend(frame)
 
 def V_c_video():
-		global root
-		frame = videofeed.get_frame()
-		vsock.vsend(frame)
-		frame = vsock.vreceive()
-		videofeed.set_frame(frame)
-		if (endVideo == False):
-			root.after(1, V_s_video)
+		global root,endVideo
+		while (endVideo == False):
+			frame = videofeed.get_frame()
+			vsock.vsend(frame)
+			frame = vsock.vreceive()
+			videofeed.set_frame(frame)
 
 
 def V_s(child_conn):
 	global root, videofeed, vsock
-        
-        client_socket = pickle.loads(child_conn.recv())
+	client_socket = pickle.loads(child_conn.recv())
 	vsock = videosocket.videosocket(client_socket) # establish a video connection
 	videofeed = VideoFeed(1,"A",1)
-
-        root.after(0,V_s_video)
-        root.mainloop()
+	V_s_video()
+	
 
 def V_c(child_conn):
 	global root, videofeed, vsock
-        
 	client_socket = pickle.loads(child_conn.recv())
 	vsock = videosocket.videosocket(client_socket) # establish a video connection
 	videofeed = VideoFeed(1,"B",1)
-
-        root.after(0,V_c_video)
-        root.mainloop()
+	V_c_video()

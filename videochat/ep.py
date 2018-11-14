@@ -10,7 +10,7 @@ from multiprocessing.reduction import ForkingPickler
 import StringIO
 from video_helper import *
 
-multiprocessing.set_start_method('spawn') 
+# multiprocessing.set_start_method('spawn')
 
 haveConnection = False
 U_client_socket = U_address = None
@@ -38,7 +38,7 @@ def spawnVideo_c ():
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6001))
+        self.daemon_socket.bind(("", 6000))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -64,7 +64,7 @@ class Client:
         global win, sock
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 6000))
+            client_socket.connect((ip_addr, 6001))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
