@@ -1,6 +1,7 @@
 import socket, videosocket
 from videofeed import VideoFeed
 from threading import Thread,Timer
+from PIL import ImageTk
 import Tkinter as tk
 import tkMessageBox
 import StringIO
@@ -42,8 +43,8 @@ class Server:
                 print("Obtained frame")
                 vsock.vsend(frame)
                 print("Send frame")
-        except Exception as e:
-            print e
+        except AttributeError as e:
+            print("Some Exception")
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
@@ -64,8 +65,8 @@ class Client:
                 frame = vsock.vreceive()
                 # videofeed.set_frame(frame)
                 root.set_frame(frame)
-        except:
-            print ('Expcetion occurred')
+        except AttributeError as e:
+            print("Some Exception")
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
     global haveConnection, server, win
@@ -113,7 +114,7 @@ class Master:
         self.button_quit.pack()
 
     def set_frame(self,frame):
-        frame = tk.Imagetk.PhotoImage(frame)
+        frame = ImageTk.PhotoImage(frame)
         if self.panel == None:
             self.panel = tk.Label(image=frame)
             self.panel.image = frame
