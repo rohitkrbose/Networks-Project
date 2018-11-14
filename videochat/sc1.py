@@ -28,22 +28,26 @@ class Daemon:
 
 class Server:
     def connect(self):
-        global haveConnection, U_client_socket, U_address, videoRunning, quit_win
+        global haveConnection, U_client_socket, U_address, videoRunning, quit_win, root
         client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         # quit_win.deiconify()
+        videofeed = VideoFeed(1,"Server",1)
         try:
-            while (VideoRunning):
+            while (videoRunning):
                 frame = vsock.vreceive()
-                videofeed.set_frame(frame)
+                print("Frame received")
+                root.set_frame(frame)
                 frame = videofeed.get_frame()
+                print("Obtained frame")
                 vsock.vsend(frame)
-        except:
-            print ('Exception occurred')
+                print("Send frame")
+        except Exception as e:
+            print e
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
-        global win, VideoRunning, quit_win
+        global win, videoRunning, quit_win, root
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip_addr, 6000))
@@ -54,11 +58,12 @@ class Client:
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         videofeed = VideoFeed(1,"Client",1)
         try:
-            while (VideoRunning):
+            while (videoRunning):
                 frame = videofeed.get_frame()
                 vsock.vsend(frame)
                 frame = vsock.vreceive()
-                videofeed.set_frame(frame)
+                # videofeed.set_frame(frame)
+                root.set_frame(frame)
         except:
             print ('Expcetion occurred')
 
@@ -66,10 +71,10 @@ def constantlyCheck (): # I am the server! This is a helper function for the dae
     global haveConnection, server, win
     # Here we should have an option: To reject or to accept. Only accept code is written here.
     if (haveConnection == True): # If daemon listened to some shit
-        win.withdraw()  # Hide the Connect To window
+        # win.withdraw()  # Hide the Connect To window
         haveConnection = False
         server.connect() # Initiate video chat as server
-    root.after(2, constantlyCheck) # Run this function again after 2 seconds
+    root.root.after(2, constantlyCheck) # Run this function again after 2 seconds
 
 def connectTo(): # I am the client!
     global win, ip, client
@@ -92,16 +97,27 @@ thread_daemon.start()
 ip = ''
 
 # Tkinter stuff
-root = tk.Tk()
-root.title("Chat Client")
-entry_ip = tk.Entry(root) # IP entry
-button_connect = tk.Button(root, text = 'Connect To', command = lambda: connectTo()) # Connect to IP
-button_quit = tk.Button(root, text = 'Quit', command = lambda: changeVideoState()) # Alter video state variable
 
-entry_ip.pack(); 
-button_connect.pack();
-button_quit.pack()
-# root.withdraw()
+class Master:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Chat Client")
+        self.entry_ip = tk.Entry(self.root) # IP entry
+        self.button_connect = tk.Button(self.root, text = 'Connect To', command = lambda: connectTo()) # Connect to IP
+        self.button_quit = tk.Button(self.root, text = 'Quit', command = lambda: changeVideoState()) # Alter video state variable
+        self.panel = tk.Label()
+        
+        self.panel.pack()
+        self.entry_ip.pack(); 
+        self.button_connect.pack();
+        self.button_quit.pack()
 
-root.after(0, constantlyCheck)
-root.mainloop()
+    def set_frame(frame):
+        frame = tk.Imagetk.PhotoImage(frame)
+        self.panel.configure(image=frame)
+        self.panel.image = frame
+
+
+root = Master()
+root.root.after(0, constantlyCheck)
+root.root.mainloop()
