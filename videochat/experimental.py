@@ -1,4 +1,3 @@
-from multiprocessing import Process,Queue,Pipe
 import socket, videosocket
 from videofeed import VideoFeed
 from threading import Thread,Timer
@@ -7,6 +6,11 @@ import tkMessageBox
 
 haveConnection = False
 U_client_socket = U_address = None
+end = False
+
+def closeVideo ():
+    global end
+    end = True
 
 class Daemon:
     def __init__(self):
@@ -27,11 +31,11 @@ class Daemon:
 
 class Server:
     def connect(self):
-        global haveConnection, U_client_socket, U_address
+        global haveConnection, U_client_socket, U_address, end
         client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         videofeed = VideoFeed(1,"A1",1)
-        while True:
+        while end == False:
             frame = vsock.vreceive()
             videofeed.set_frame(frame)
             frame = videofeed.get_frame()
@@ -39,7 +43,7 @@ class Server:
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
-        global win
+        global win, end
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip_addr, 6000))
@@ -48,7 +52,7 @@ class Client:
         win.withdraw() # Hide the Connect To window
         vsock = videosocket.videosocket (client_socket) # establish a video connection
         videofeed = VideoFeed(1,"A2",1)
-        while True:
+        while end == False:
             frame = videofeed.get_frame()
             vsock.vsend(frame)
             frame = vsock.vreceive()
@@ -85,7 +89,6 @@ ip = ''
 entry_ip = tk.Entry(win) # IP entry
 button_connect = tk.Button(win, text = 'Connect To', command = lambda: connectTo()) # Connect to IP
 entry_ip.pack(); button_connect.pack();
-root.withdraw()
-
+root.bind('<Escape>', lambda e: closeVideo())
 root.after(0, constantlyCheck)
 root.mainloop()
