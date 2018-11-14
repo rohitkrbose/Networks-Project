@@ -18,9 +18,11 @@ def V_s (child_conn):
 def V_c (child_conn):
 	client_socket = pickle.loads(child_conn.recv())
 	vsock = videosocket.videosocket(client_socket) # establish a video connection
-	videofeed = VideoFeed(1,"A",1)
+	videofeed = VideoFeed(1,"B",1)
 	while True:
 		frame = videofeed.get_frame()
 		vsock.vsend(frame)
+		print ('I sent')
 		frame = vsock.vreceive()
+		print ('I received')
 		videofeed.set_frame(frame)
