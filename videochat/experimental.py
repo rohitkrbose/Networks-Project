@@ -15,7 +15,7 @@ def closeVideo ():
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6001))
+        self.daemon_socket.bind(("", 6000))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -46,7 +46,7 @@ class Client:
         global win, end
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 6000))
+            client_socket.connect((ip_addr, 6001))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
@@ -88,7 +88,9 @@ win = tk.Toplevel()
 ip = ''
 entry_ip = tk.Entry(win) # IP entry
 button_connect = tk.Button(win, text = 'Connect To', command = lambda: connectTo()) # Connect to IP
+button_exit = tk.Button(root, text = 'Quit', command = lambda: closeVideo())
 entry_ip.pack(); button_connect.pack();
-root.bind('<Escape>', lambda e: closeVideo())
+button_exit.pack()
+
 root.after(0, constantlyCheck)
 root.mainloop()
