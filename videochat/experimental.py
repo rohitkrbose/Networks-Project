@@ -19,7 +19,7 @@ class Daemon:
         while True:
             cs, addr = self.daemon_socket.accept()
             if (haveConnection == True):
-            	continue
+                continue
             haveConnection = True
             U_client_socket = cs; U_address = addr;
             print "I got a connection from ", addr
@@ -38,13 +38,13 @@ class Server:
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
+        global win
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip_addr, 6000))
         except:
             return ('Unavailable')
-        global win
-        win.destroy()
+        win.withdraw()
         vsock = videosocket.videosocket (client_socket)
         videofeed = VideoFeed(1,"A2",1)
         while True:
@@ -54,9 +54,10 @@ class Client:
             videofeed.set_frame(frame)
 
 def constantlyCheck (): # I am the server!
-    global haveConnection, server
+    global haveConnection, server, win
     if (haveConnection == True):
-        tkMessageBox.showerror("Error", "Someone wants to talk to you!")
+        win.withdraw()
+        haveConnection = False
         server.connect()
     root.after(3, constantlyCheck)
 
@@ -86,15 +87,3 @@ root.withdraw()
 
 root.after(0, constantlyCheck)
 root.mainloop()
-
-
-
-
-
-
-
-
-
-# while (True):
-#     if (haveConnection == True): # daemon listened to some shit i.e. someone wants to talk to me
-#         server.connect()
