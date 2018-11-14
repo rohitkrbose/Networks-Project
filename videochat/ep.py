@@ -18,18 +18,24 @@ def forking_dumps(obj):
     ForkingPickler(buf).dump(obj)
     return buf.getvalue()
 
-def spawnVideo ():
+def spawnVideo_s ():
 	global sock
 	parent_conn,child_conn = Pipe()
-	print (sock)
 	parent_conn.send(forking_dumps(sock))
-	p = Process(target=V, args=(child_conn,))
+	p = Process(target=V_s, args=(child_conn,))
+	p.start()
+
+def spawnVideo_c ():
+	global sock
+	parent_conn,child_conn = Pipe()
+	parent_conn.send(forking_dumps(sock))
+	p = Process(target=V_c, args=(child_conn,))
 	p.start()
 
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 7001))
+        self.daemon_socket.bind(("", 6001))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -48,19 +54,19 @@ class Server:
         global haveConnection, U_client_socket, U_address, sock
         client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
         sock = client_socket
-        spawnVideo()
+        spawnVideo_s()
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
         global win, sock
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 7000))
+            client_socket.connect((ip_addr, 6000))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
         sock = client_socket
-        spawnVideo()
+        spawnVideo_c()
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
     global haveConnection, server, win
