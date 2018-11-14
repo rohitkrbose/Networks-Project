@@ -4,7 +4,6 @@ from threading import Thread,Timer
 import Tkinter as tk
 import tkMessageBox
 
-occupied = False
 haveConnection = False
 U_client_socket = U_address = None
 
@@ -27,6 +26,7 @@ class Daemon:
 
 class Server:
     def connect(self):
+        global haveConnection, U_client_socket, U_address
         client_socket, address = U_client_socket, U_address
         vsock = videosocket.videosocket(client_socket)
         videofeed = VideoFeed(1,"A1",1)
@@ -43,6 +43,8 @@ class Client:
             client_socket.connect((ip_addr, 6000))
         except:
             return ('Unavailable')
+        global win
+        win.destroy()
         vsock = videosocket.videosocket (client_socket)
         videofeed = VideoFeed(1,"A2",1)
         while True:
@@ -51,15 +53,14 @@ class Client:
             frame = vsock.vreceive()
             videofeed.set_frame(frame)
 
-class ConstantlyCheck: # I am the server!
+def constantlyCheck (): # I am the server!
     global haveConnection, server
-    def start(self):
-        while True:
-            if (haveConnection == True):
-                print ('Someone wants to talk to you')
-                tkMessageBox.showerror("Error", "Someone wants to talk to you!")
+    if (haveConnection == True):
+        tkMessageBox.showerror("Error", "Someone wants to talk to you!")
+        server.connect()
+    root.after(3, constantlyCheck)
 
-def connectTo():
+def connectTo(): # I am the client!
     global win, ip, client
     ip = entry_ip.get()
     result = client.connect(ip)
@@ -69,12 +70,9 @@ def connectTo():
 daemon = Daemon()
 server = Server()
 client = Client()
-CC = ConstantlyCheck()
 
 thread_daemon = Thread(target = daemon.start)
 thread_daemon.start()
-thread_CC = Thread(target = CC.start)
-thread_CC.start()
 
 # Tkinter stuff
 root = tk.Tk()
@@ -86,6 +84,7 @@ button_connect = tk.Button(win, text = 'Connect', command = lambda: connectTo())
 entry_ip.pack(); button_connect.pack();
 root.withdraw()
 
+root.after(0, constantlyCheck)
 root.mainloop()
 
 
