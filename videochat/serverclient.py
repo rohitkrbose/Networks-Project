@@ -12,7 +12,7 @@ U_client_socket = U_address = None
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6001))
+        self.daemon_socket.bind(("", 6000))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -37,22 +37,26 @@ class Server:
             while (True):
                 key=cv2.waitKey(1) & 0xFF
                 if key == ord('q'):
-                    win.deiconify()
+                    del videofeed
                     break
                 frame = vsock.vreceive()
                 videofeed.set_frame(frame)
                 frame = videofeed.get_frame()
+                if (frame == "Timeout"):
+                    del videofeed
+                    break
                 vsock.vsend(frame)
         except:
-            print ('Exception occurred')
-        cv2.destroyAllWindows()
+            pass
+        win.deiconify()
+        # cv2.destroyAllWindows()
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
         global win
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 6000))
+            client_socket.connect((ip_addr, 6001))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
@@ -63,15 +67,19 @@ class Client:
             while (True):
                 key=cv2.waitKey(1) & 0xFF
                 if key == ord('q'):
-                    win.deiconify()
+                    del videofeed
                     break
                 frame = videofeed.get_frame()
                 vsock.vsend(frame)
                 frame = vsock.vreceive()
+                if (frame == "Timeout"):
+                    del videofeed
+                    break
                 videofeed.set_frame(frame)
         except:
-            print ('Expcetion occurred')
-        cv2.destroyAllWindows()
+            pass
+        win.deiconify()
+        # cv2.destroyAllWindows()
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
     global haveConnection, server, win

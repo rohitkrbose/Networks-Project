@@ -27,6 +27,7 @@ class videosocket:
             try:
                 sent = self.sock.send(lengthstr[metasent:])
             except TimeoutException:
+                return ("Timeout")
                 raise RuntimeError("Timeout")
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
@@ -37,6 +38,7 @@ class videosocket:
             try:
                 sent = self.sock.send(framestring[totalsent:])
             except TimeoutException:
+                return ("Timeout")
                 raise RuntimeError("Timeout")
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
@@ -51,6 +53,7 @@ class videosocket:
             try:
                 chunk = self.sock.recv(8 - metarec)
             except TimeoutException:
+                return ("Timeout")
                 raise RuntimeError("Timeout")
             if chunk == '':
                 raise RuntimeError("Socket connection broken")
@@ -63,6 +66,7 @@ class videosocket:
             try:
                 chunk = self.sock.recv(length - totrec)
             except TimeoutException:
+                return ("Timeout")
                 raise RuntimeError("Timeout")
             if chunk == '':
                 raise RuntimeError("Socket connection broken")
