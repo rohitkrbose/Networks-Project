@@ -12,6 +12,7 @@ class videosocket:
         else:
             self.sock = sock
         self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.sock.settimeout(5)
 
     def connect(self,host,port):
         self.sock.connect((host,port))
@@ -23,14 +24,22 @@ class videosocket:
         lengthstr = str(length).zfill(8)
 
         while metasent < 8 :
-            sent = self.sock.send(lengthstr[metasent:])
+            try:
+                sent = self.sock.send(lengthstr[metasent:])
+            except TimeoutException:
+                return ("Timeout")
+                raise RuntimeError("Timeout")
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
             metasent += sent
         
         
         while totalsent < length :
-            sent = self.sock.send(framestring[totalsent:])
+            try:
+                sent = self.sock.send(framestring[totalsent:])
+            except TimeoutException:
+                return ("Timeout")
+                raise RuntimeError("Timeout")
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
             totalsent += sent
@@ -41,7 +50,11 @@ class videosocket:
         msgArray = []
         metaArray = []
         while metarec < 8:
-            chunk = self.sock.recv(8 - metarec)
+            try:
+                chunk = self.sock.recv(8 - metarec)
+            except TimeoutException:
+                return ("Timeout")
+                raise RuntimeError("Timeout")
             if chunk == '':
                 raise RuntimeError("Socket connection broken")
             metaArray.append(chunk)
@@ -50,7 +63,11 @@ class videosocket:
         length=int(lengthstr)
 
         while totrec<length :
-            chunk = self.sock.recv(length - totrec)
+            try:
+                chunk = self.sock.recv(length - totrec)
+            except TimeoutException:
+                return ("Timeout")
+                raise RuntimeError("Timeout")
             if chunk == '':
                 raise RuntimeError("Socket connection broken")
             msgArray.append(chunk)
