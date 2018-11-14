@@ -33,12 +33,20 @@ class Master:
         self.entry_email.pack(); self.entry_pw.pack(); self.button_login.pack(); self.button_quit.pack()
         self.entry_otp.pack(); self.button_verifyOTP.pack();
 
-        self.label = tk.Label(self.root, text = 'This is your main window and you can input anything you want here')
-        self.label.pack()
+        # self.label = tk.Label(self.root, text = 'This is your main window and you can input anything you want here')
+        # self.label.pack()
+        self.entry_ip = tk.Entry(self.root) # IP entry
+        self.button_connect = tk.Button(self.root, text = 'Connect To', command = lambda: connectTo()) # Connect to IP
+
+        self.entry_ip.pack()
+        self.button_connect.pack()
 
         # Hide useless windows at first
         self.root.withdraw()
         self.win_auth2.withdraw()
+
+    def postLogin(self):
+        pass
 
     def authenticate_email(self):
         email = self.entry_email.get()
