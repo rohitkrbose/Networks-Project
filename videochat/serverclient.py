@@ -12,7 +12,7 @@ U_client_socket = U_address = None
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6001))
+        self.daemon_socket.bind(("", 6000))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -34,7 +34,7 @@ class Server:
         videofeed = VideoFeed(1,"Server",1)
         quit_win.deiconify()
         try:
-            while (VideoRunning):
+            while (videoRunning):
                 frame = vsock.vreceive()
                 videofeed.set_frame(frame)
                 frame = videofeed.get_frame()
@@ -44,10 +44,10 @@ class Server:
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
-        global win, VideoRunning, quit_win
+        global win, videoRunning, quit_win
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 6000))
+            client_socket.connect((ip_addr, 6001))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
@@ -55,7 +55,7 @@ class Client:
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         videofeed = VideoFeed(1,"Client",1)
         try:
-            while (VideoRunning):
+            while (videoRunning):
                 frame = videofeed.get_frame()
                 vsock.vsend(frame)
                 frame = vsock.vreceive()
