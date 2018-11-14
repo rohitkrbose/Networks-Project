@@ -7,7 +7,7 @@ import StringIO
 import pickle
 import Tkinter as tk
 
-multiprocessing.set_start_method('spawn') 
+# multiprocessing.set_start_method('spawn') 
 root = tk.Tk()
 endVideo = False
 videofeed = None
