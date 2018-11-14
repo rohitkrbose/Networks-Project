@@ -22,7 +22,6 @@ class VideoFeed:
                 self.camera_index = 0
                 self.cam = cv2.VideoCapture(self.camera_index)
 
-        #cv2.imshow('my webcam', img)
         cv2_im = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         pil_im = Image.fromarray(cv2_im)
         b = io.BytesIO()
