@@ -12,7 +12,7 @@ U_client_socket = U_address = None
 class Daemon:
     def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6000))
+        self.daemon_socket.bind(("", 6001))
         self.daemon_socket.listen(5)
         print "TCPServer Waiting for client on port 6001"
 
@@ -52,7 +52,7 @@ class Client:
         global win
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip_addr, 6001))
+            client_socket.connect((ip_addr, 6000))
         except:
             return ('Unavailable') # if Client can't get a connection to that IP
         win.withdraw() # Hide the Connect To window
