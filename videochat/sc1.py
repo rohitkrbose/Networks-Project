@@ -77,8 +77,8 @@ def constantlyCheck (): # I am the server! This is a helper function for the dae
     root.root.after(2, constantlyCheck) # Run this function again after 2 seconds
 
 def connectTo(): # I am the client!
-    global win, ip, client
-    ip = entry_ip.get()
+    global win, ip, client, root
+    ip = root.entry_ip.get()
     result = client.connect(ip) # Initiate video chat as client
     if (result != None):
         tkMessageBox.showerror("Error", "Nobody there!")
@@ -105,17 +105,22 @@ class Master:
         self.entry_ip = tk.Entry(self.root) # IP entry
         self.button_connect = tk.Button(self.root, text = 'Connect To', command = lambda: connectTo()) # Connect to IP
         self.button_quit = tk.Button(self.root, text = 'Quit', command = lambda: changeVideoState()) # Alter video state variable
-        self.panel = tk.Label()
+        # self.panel = tk.Label()
+        self.panel = None
         
-        self.panel.pack()
         self.entry_ip.pack(); 
         self.button_connect.pack();
         self.button_quit.pack()
 
-    def set_frame(frame):
+    def set_frame(self,frame):
         frame = tk.Imagetk.PhotoImage(frame)
-        self.panel.configure(image=frame)
-        self.panel.image = frame
+        if self.panel == None:
+            self.panel = tk.Label(image=frame)
+            self.panel.image = frame
+            self.panel.pack()
+        else:
+            self.panel.configure(image=frame)
+            self.panel.image = frame
 
 
 root = Master()
