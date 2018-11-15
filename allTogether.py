@@ -3,7 +3,7 @@ import tkMessageBox
 import auth # Imports auth
 import sys # Imports sys, used to end the program later
 import socket
-import Thread
+from threading import Thread
 
 # This file is for the client
 
@@ -52,7 +52,7 @@ class Server:
                 vsock.vsend(frame)
         except Exception as e:
             print ('Some issue!')
-        onClose()
+        master.onClose()
         master.connWindow.deiconify()
         self.connectExitTrigger()
 
@@ -87,7 +87,7 @@ class Client:
                     master.vidWindow.update()
         except Exception as e:
             print ('Some issue!')
-        onClose()
+        master.onClose()
         master.connWindow.deiconify()
 
     def connectToDummy (self,msg=''): # Connect to
@@ -102,13 +102,14 @@ class Client:
 
 class Master:
     def __init__(self, sIP):
+        print ('GALU')
         self.dummyIP = sIP
         self.dummmySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print (self.dummyIP)
         try:
-            self.dummySocket.connect((sIp,sPort))
+            self.dummySocket.connect((self.dummyIP,6000))
         except:
             print "Server Port/IP unavailable/incorrect"
-            sys.exit(0)
         
         # Tk Stuff
         self.root = tk.Tk() # Declares root as the tkinter main window
@@ -117,6 +118,16 @@ class Master:
         self.videoRunning = True
         self.U_client_socket = None
         self.U_address = None
+        self.videofeed = None
+
+    def onClose ():
+        self.videofeed.cam.release()
+        del self.videofeed
+        self.videofeed = VideoFeed (1, "ZAMZAM", 1)
+        self.vidWindow.destroy()
+        self.vidWindow = tk.Toplevel()
+        self.vidWindow.withdraw()
+
 
     def first_pages(self):
         # Variables used everywhere
@@ -141,9 +152,6 @@ class Master:
         self.entry_email.pack(); self.entry_pw.pack(); self.button_login.pack(); self.button_quit.pack()
         self.entry_otp.pack(); self.button_verifyOTP.pack();
 
-        # self.label = tk.Label(self.root, text = 'This is your main window and you can input anything you want here')
-        # self.label.pack()
-
         # Hide useless windows at first
         self.root.withdraw()
         self.win_auth2.withdraw()
@@ -152,7 +160,7 @@ class Master:
         '''
             This is called after authenticate_otp
         '''
-        self.connWindow = tk.TopLevel();
+        self.connWindow = tk.Toplevel();
         self.vidWindow = tk.Toplevel();
         self.entry_username = tk.Entry(self.vidWindow) # IP entry
         self.button_connect = tk.Button(self.vidWindow, text = 'Connect To', command = lambda: self.connectTo()) # Connect to IP
@@ -205,7 +213,7 @@ if __name__ == '__main__':
     master.first_pages()
     root = master.root
     daemon = Daemon()
-    server = Server(dummySocket)
-    client = Client(dummySocket)
+    server = Server()
+    client = Client()
 
     root.mainloop() # Starts the event loop for the main window
