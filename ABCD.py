@@ -64,13 +64,6 @@ class Server:
             print (e)
             print ('Some issue!')
         master.onClose()
-        master.connWindow.deiconify()
-        self.connectExitTrigger()
-
-    def connectExitTrigger (self, msg=''): # Connect to
-        msg = "CONNECTME," + master.email
-        master.dummySocket.send(msg.encode('utf-8'))
-        r_msg = master.dummySocket.recv(2048).decode('utf-8')
 
 class Client:
     def connectToOtherClient(self, ip_addr = "127.0.0.1"):
@@ -101,7 +94,6 @@ class Client:
             print (e)
             print ('Some issue!')
         master.onClose()
-        master.connWindow.deiconify()
 
     def connectToDummy (self,msg=''): # Connect to
         msg = "CONNECT," + master.entry_username.get()
@@ -111,9 +103,6 @@ class Client:
         print (r_msg)
         if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'): # Connection successful
             self.connectToOtherClient(ip_addr=r_msg)
-            msg = "CONNECTME," + master.email
-            master.dummySocket.send(msg.encode('utf-8'))
-            r_msg = master.dummySocket.recv(2048).decode('utf-8')
         
 
 class Master:
@@ -138,11 +127,15 @@ class Master:
 
     def onClose (self):
         self.videofeed.cam.release()
+        self.connWindow.deiconify()
         del self.videofeed
         self.videofeed = VideoFeed (1, "ZAMZAM", 1)
         self.vidWindow.destroy()
         self.vidWindow = tk.Toplevel()
         self.vidWindow.withdraw()
+        msg = "CONNECTME," + self.email
+        self.dummySocket.send(msg.encode('utf-8'))
+        self.dummySocket.recv(2048).decode('utf-8')
         self.vidPanel = None
 
 
@@ -205,20 +198,16 @@ class Master:
         entered_otp = self.entry_otp.get()
         if (self.otp == entered_otp):
             self.win_auth2.destroy() # Removes OTP window
-            # self.root.deiconify() # Unhides root window
             self.postLogin()
         else:
             tkMessageBox.showerror("Error", "Invalid OTP!")
 
     def quit(self):
         self.win_auth1.destroy() # Removes the top level window
-        # self.root.destroy() # Removes the hidden root window
 
     def constantlyCheck(self): # I am the server! This is a helper function for the daemon.
-
         # Here we should have an option: To reject or to accept. Only accept code is written here.
         if (self.haveConnection == True): # If daemon listened to some shit
-            # win.withdraw()  # Hide the Connect To window
             self.haveConnection = False
             server.connect() # Initiate video chat as server
         self.root.after(2, self.constantlyCheck) # Run this function again after 2 seconds
