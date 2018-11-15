@@ -68,8 +68,9 @@ class Server:
         self.connectExitTrigger()
 
     def connectExitTrigger (self, msg=''): # Connect to
-        msg = "CONNECTME, " + master.email
+        msg = "CONNECTME," + master.email
         master.dummySocket.send(msg.encode('utf-8'))
+        r_msg = master.dummySocket.recv(2048).decode('utf-8')
 
 class Client:
     def connectToOtherClient(self, ip_addr = "127.0.0.1"):
@@ -110,8 +111,9 @@ class Client:
         print (r_msg)
         if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'): # Connection successful
             self.connectToOtherClient(ip_addr=r_msg)
-            msg = "CONNECTME, " + master.email
+            msg = "CONNECTME," + master.email
             master.dummySocket.send(msg.encode('utf-8'))
+            r_msg = master.dummySocket.recv(2048).decode('utf-8')
         
 
 class Master:
