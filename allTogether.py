@@ -11,7 +11,6 @@ from threading import Thread,Timer
 from PIL import Image
 from PIL import ImageTk
 import Tkinter as tk
-from Tkinter import *
 import tkMessageBox
 import StringIO
 import cv2
@@ -23,7 +22,7 @@ class Daemon:
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.daemon_socket.bind(("", 6000))
         self.daemon_socket.listen(5)
-        print "TCPServer Waiting for Client on port 6000"
+        print "Waiting for Chat"
         thread_daemon = Thread(target = self.start)
         thread_daemon.start()
 
@@ -39,6 +38,7 @@ class Daemon:
 
 class Server:
     def connect(self):
+        tkMessageBox.showinfo("Info", "Connection accepted!")
         # global haveConnection, U_client_socket, U_address
         client_socket, address = master.U_client_socket, master.U_address # retrieve info from global variables (changes made by Daemon)
         vsock = videosocket.videosocket(client_socket) # establish a video connection
@@ -68,8 +68,9 @@ class Server:
                 frame = master.videofeed.get_frame()
                 vsock.vsend(frame)
         except Exception as e:
-            print (e)
-            print ('Some issue!')
+            pass
+            # print (e)
+            # print ('Some issue!')
         master.onClose()
         master.connWindow.deiconify()
         self.connectExitTrigger()
@@ -112,27 +113,32 @@ class Client:
                     master.vidPanel.image = image; 
                     master.vidWindow.update()
         except Exception as e:
-            print (e)
-            print ('Some issue!')
+            pass
+            # print (e)
+            # print ('Some issue!')
         master.onClose()
         master.connWindow.deiconify()
 
     def connectToDummy (self,msg=''): # Connect to
-        msg = "CONNECT," + master.entry_username.get()
-        print (msg)
+        u = master.entry_username.get()
+        msg = "CONNECT," + u
+        # print (msg)
         master.dummySocket.send(msg.encode('utf-8'))
         r_msg = master.dummySocket.recv(2048).decode('utf-8')
-        print (r_msg)
+        # print (r_msg)
         if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'): # Connection successful
             self.connectToOtherClient(ip_addr=r_msg)
             msg = "CONNECTME," + master.email
             master.dummySocket.send(msg.encode('utf-8'))
             r_msg = master.dummySocket.recv(2048).decode('utf-8')
+        else if (r_msg == 'NOT AVAILABLE'):
+            tkMessageBox.showerror("Error", u + " is unavailable.")
+        else:
+            tkMessageBox.showerror("Error", u + " is busy.")
         
 
 class Master:
     def __init__(self, sIP, sPort):
-        self.var = IntVar()
         self.videoMode = 0
         self.videofeed = VideoFeed (1, "ZAMZAM", 1)
         self.vidPanel = None
@@ -142,8 +148,8 @@ class Master:
             self.dummySocket.connect((self.dummyIP,sPort))
             pass
         except:
-            print "Server Port/IP unavailable/incorrect"
-        
+            tkMessageBox.showerror("Error", "Server Port/IP unavailable/incorrect")
+
         # Tk Stuff
         self.root = tk.Tk() # Declares root as the tkinter main window
         self.root.title("Chat Client")
@@ -151,6 +157,7 @@ class Master:
         self.videoRunning = True
         self.U_client_socket = None
         self.U_address = None
+        self.var = tk.IntVar()
 
     def onClose (self):
         self.videofeed.cam.release()
@@ -189,7 +196,7 @@ class Master:
         self.root.withdraw()
         self.win_auth2.withdraw()
 
-    def sel():
+    def sel(self):
         self.videoMode = self.var.get()
 
     def postLogin(self):
@@ -200,29 +207,31 @@ class Master:
         self.vidWindow = tk.Toplevel();
         self.entry_username = tk.Entry(self.connWindow) # IP entry
         self.button_connect = tk.Button(self.connWindow, text = 'Connect To', command = lambda: self.connectTo()) # Connect to IP
-
+        self.button_endEverything = tk.Button(self.connWindow, text = 'Quit', command = lambda: self.endEverything())
+        self.marquee = tk.Label(self.connWindow, text = '---Mode---')
         self.entry_username.pack()
         self.button_connect.pack()
+        self.marquee.pack()
         self.vidWindow.deiconify()
 
         # Send CONNECTME to dummyserver
         msg = "CONNECTME," + self.email
         self.dummySocket.send(msg.encode('utf-8'))
-        print(self.dummySocket.recv(2048).decode('utf-8'))
-
+        # print(self.dummySocket.recv(2048).decode('utf-8'))
 
         # CONNECT SHIT
-        R1 = Radiobutton(connWindow, text="None", variable=self.var, value=0, command=self.sel)
+        R1 = tk.Radiobutton(self.connWindow, text="None", variable=self.var, value=0, command=self.sel)
         R1.pack()
-        R2 = Radiobutton(connWindow, text= "Hat", variable=self.var, value=1, command=self.sel)
+        R2 = tk.Radiobutton(self.connWindow, text= "Hat", variable=self.var, value=1, command=self.sel)
         R2.pack()
-        R3 = Radiobutton(connWindow, text="Moustache", variable=self.var, value=2, command=self.sel)
+        R3 = tk.Radiobutton(self.connWindow, text="Moustache", variable=self.var, value=2, command=self.sel)
         R3.pack()
-        R4 = Radiobutton(connWindow, text="Ha-stache", variable=self.var, value=3, command=self.sel)
+        R4 = tk.Radiobutton(self.connWindow, text="Ha-stache", variable=self.var, value=3, command=self.sel)
         R4.pack()
-        R5 = Radiobutton(connWindow, text="Doggy Style", variable=self.var, value=4, command=self.sel)
+        R5 = tk.Radiobutton(self.connWindow, text="Doggy Style", variable=self.var, value=4, command=self.sel)
         R5.pack()
 
+        self.button_endEverything.pack();
 
     def authenticate_email(self):
         self.email = self.entry_email.get()
@@ -263,6 +272,11 @@ class Master:
         if (result != None):
             tkMessageBox.showerror("Error", "Nobody there!")
 
+    def endEverything (self):
+        msg = 'DISCONNECTME,' + self.email
+        self.dummySocket.send(msg.encode('utf-8'))
+        self.root.destroy()
+        sys.exit(0)
 
 master = Master(sys.argv[1],int(sys.argv[2])) # send server IP
 master.first_pages()
