@@ -14,7 +14,7 @@ import Tkinter as tk
 import tkMessageBox
 import StringIO
 import cv2
-
+from cvFilters.filters import *
 # This file is for the client
 
 class Daemon:
@@ -48,7 +48,12 @@ class Server:
                 frame = vsock.vreceive()
                 if (frame == None):
                     raise Exception
-                image = ImageTk.PhotoImage(Image.fromarray(master.videofeed.set_frame(frame)))
+
+                frame = master.videofeed.set_frame(frame)
+                # Specify choice for Filter here
+                frame = get_Frame(frame, 3)
+                image = ImageTk.PhotoImage(Image.fromarray(frame))
+
                 if master.vidPanel is None:
                     master.vidPanel = tk.Label(master.vidWindow,image=image)
                     master.vidPanel.image = image
@@ -88,7 +93,12 @@ class Client:
                 frame = vsock.vreceive()
                 if (frame == None):
                     raise Exception # Timeout
-                image = ImageTk.PhotoImage(Image.fromarray(master.videofeed.set_frame(frame)))
+
+                frame = master.videofeed.set_frame(frame)
+                # Specify choice for Filter here
+                frame = get_Frame(frame, 3)
+                image = ImageTk.PhotoImage(Image.fromarray(frame))
+
                 if master.vidPanel is None: # first frame
                     master.vidPanel = tk.Label(master.vidWindow,image=image)
                     master.vidPanel.image = image
