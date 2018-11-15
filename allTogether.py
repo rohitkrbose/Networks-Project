@@ -175,6 +175,7 @@ class Master:
         # Send CONNECTME to dummyserver
         msg = "CONNECTME," + self.email
         self.dummySocket.send(msg.encode('utf-8'))
+        print(self.dummySocket.rcv(2048).decode('utf-8'))
 
     def authenticate_email(self):
         self.email = self.entry_email.get()
@@ -182,7 +183,7 @@ class Master:
         if (auth.verify_mail(self.email,pw) == True): # Checks whether username and password are correct
             self.win_auth1.destroy() # Removes email window
             self.win_auth2.deiconify() # Unhides OTP window
-            self.otp = auth.send_OTP(email)
+            self.otp = auth.send_OTP(self.email)
         else:
             tkMessageBox.showerror("Error", "Invalid credentials!")
 
@@ -219,6 +220,6 @@ master = Master(sys.argv[1]) # send server IP
 master.first_pages()
 root = master.root
 daemon = Daemon()
-# server = Server()
-# client = Client()
-# root.mainloop() # Starts the event loop for the main window
+server = Server()
+client = Client()
+root.mainloop() # Starts the event loop for the main window
