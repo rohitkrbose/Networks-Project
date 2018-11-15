@@ -45,6 +45,8 @@ class Server:
             video_win.deiconify()
             while (True):
                 frame = vsock.vreceive()
+                if (frame == None):
+                    raise Exception
                 image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
                 if panel is None:
                     panel = tk.Label(video_win,image=image)
@@ -52,15 +54,13 @@ class Server:
                     panel.pack(side="left", padx=10, pady=10)
                     video_win.update()
                 else:
-        			panel.configure(image=image)
-        			panel.image = image; video_win.update()
+                    panel.configure(image=image)
+                    panel.image = image; video_win.update()
                 frame = videofeed.get_frame()
-                if (frame == None):
-                    break
                 vsock.vsend(frame)
         except Exception as e:
-        	print (e)
-        	print ('Some issue!')
+            print (e)
+            print ('Some issue!')
             onClose()
         win.deiconify()
 
@@ -82,19 +82,18 @@ class Client:
                 vsock.vsend(frame)
                 frame = vsock.vreceive()
                 if (frame == None):
-                    break
+                    raise Exception
                 image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
                 if panel is None:
-                	panel = tk.Label(video_win,image=image)
-                	panel.image = image
-                	panel.pack(side="left", padx=10, pady=10); video_win.update()
+                    panel = tk.Label(video_win,image=image)
+                    panel.image = image
+                    panel.pack(side="left", padx=10, pady=10); video_win.update()
                 else:
-                	panel.configure(image=image)
-                	panel.image = image; video_win.update()
+                    panel.configure(image=image)
+                    panel.image = image; video_win.update()
         except Exception as e:
             print (e)
-            print ('Some issue!')
-            onClose()
+            print ('Some issue!'); onClose()
         win.deiconify()
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
