@@ -53,6 +53,13 @@ class Dummy:
                 self.free.append(name)
                 to_send = "ACCEPTING YOU"
 
+            elif command == "DISCONNECTME":
+                add = self.usertoAdd[name]
+                del self.usertoAdd[name]
+                del self.AddtoUser[add]
+                self.free.remove(name)
+                break
+
             elif command == "CONNECT":
                 # He sends to server, server sends a simple IP
                 print "CONNECT to user: ", name
