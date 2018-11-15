@@ -84,6 +84,7 @@ class Client:
     def connectToOtherClient(self, ip_addr = "127.0.0.1"):
         # global win, video_win, panel, root, videofeed
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # the other guy/gal
+        print (ip_addr, 'asdsd')
         client_socket.connect((ip_addr, 6000))  
         master.connWindow.withdraw() # Hide the Connect To window
         tkMessageBox.showinfo("Info", "Connection successful!")
@@ -120,8 +121,7 @@ class Client:
         master.connWindow.deiconify()
 
     def connectToDummy (self,msg=''): # Connect to
-        u = master.entry_username.get()
-        msg = "CONNECT," + u
+        msg = "CONNECT," + msg
         # print (msg)
         master.dummySocket.send(msg.encode('utf-8'))
         r_msg = master.dummySocket.recv(2048).decode('utf-8')
@@ -131,10 +131,10 @@ class Client:
             msg = "CONNECTME," + master.email
             master.dummySocket.send(msg.encode('utf-8'))
             r_msg = master.dummySocket.recv(2048).decode('utf-8')
-        elif (r_msg == 'NOT AVAILABLE'):
-            tkMessageBox.showerror("Error", u + " is unavailable.")
-        else:
-            tkMessageBox.showerror("Error", u + " is busy.")
+        # elif (r_msg == 'NOT AVAILABLE'):
+        #     tkMessageBox.showerror("Error", u + " is unavailable.")
+        # else:
+        #     tkMessageBox.showerror("Error", u + " is busy.")
         
 
 class Master:
@@ -149,6 +149,7 @@ class Master:
             pass
         except:
             tkMessageBox.showerror("Error", "Server Port/IP unavailable/incorrect")
+            self.root.destroy()
 
         # Tk Stuff
         self.root = tk.Tk() # Declares root as the tkinter main window
@@ -217,7 +218,7 @@ class Master:
         # Send CONNECTME to dummyserver
         msg = "CONNECTME," + self.email
         self.dummySocket.send(msg.encode('utf-8'))
-        # print(self.dummySocket.recv(2048).decode('utf-8'))
+        r_msg = self.dummySocket.recv(2048).decode('utf-8')
 
         # CONNECT SHIT
         R1 = tk.Radiobutton(self.connWindow, text="None", variable=self.var, value=0, command=self.sel)
@@ -267,6 +268,7 @@ class Master:
 
     def connectTo(self): # I am the client!
         ip = self.entry_username.get()
+        print (ip)
         self.videoMode = self.var.get()
         result = client.connectToDummy(ip) # Initiate video chat as client
         if (result != None):
