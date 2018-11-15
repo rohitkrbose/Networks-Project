@@ -131,7 +131,7 @@ class Client:
             msg = "CONNECTME," + master.email
             master.dummySocket.send(msg.encode('utf-8'))
             r_msg = master.dummySocket.recv(2048).decode('utf-8')
-        else if (r_msg == 'NOT AVAILABLE'):
+        elif (r_msg == 'NOT AVAILABLE'):
             tkMessageBox.showerror("Error", u + " is unavailable.")
         else:
             tkMessageBox.showerror("Error", u + " is busy.")
