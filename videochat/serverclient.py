@@ -10,6 +10,12 @@ import cv2
 
 haveConnection = False
 U_client_socket = U_address = None
+videofeed = VideoFeed(1,"ZAMZAM",1)
+
+def onClose ():
+    global root
+    videofeed.cam.release()
+    root.quit()
 
 class Daemon:
     def __init__(self):
@@ -30,39 +36,34 @@ class Daemon:
 
 class Server:
     def connect(self):
-        global haveConnection, U_client_socket, U_address, root, video_win, panel
+        global haveConnection, U_client_socket, U_address, root, video_win, panel, videofeed
         client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
         vsock = videosocket.videosocket(client_socket) # establish a video connection
-        videofeed = VideoFeed(1,"Server",1)
         tkMessageBox.showerror("Info", "Press \'q\' to quit!")
         try:
             while (True):
-                key = cv2.waitKey(2) & 0xFF
-                if key == ord('q'):
-                    break
                 frame = vsock.vreceive()
-
                 image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
                 if panel is None:
-			panel = tki.Label(video_win,image=image)
-			panel.image = image
-			panel.pack(side="left", padx=10, pady=10)
-		else:
-			panel.configure(image=image)
-			panel.image = image
-
+                    panel = tk.Label(root,image=image)
+                    panel.image = image
+                    panel.pack(side="left", padx=10, pady=10)
+                    root.update()
+                else:
+        			panel.configure(image=image)
+        			panel.image = image; root.update()
                 frame = videofeed.get_frame()
                 if (frame == None):
                     break
                 vsock.vsend(frame)
-        except:
-            print ('Some issue!')
-            root.destroy()
+        except Exception as e:
+        	print (e)
+        	print ('Some issue!')
         win.deiconify()
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
-        global win, video_win, panel
+        global win, video_win, panel, root, videofeed
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip_addr, 6000))
@@ -71,27 +72,21 @@ class Client:
         win.withdraw() # Hide the Connect To window
         tkMessageBox.showerror("Info", "Press \'q\' to quit!")
         vsock = videosocket.videosocket(client_socket) # establish a video connection
-        videofeed = VideoFeed(1,"Client",1)
         try:
             while (True):
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord('q'):
-                    break
                 frame = videofeed.get_frame()
                 vsock.vsend(frame)
                 frame = vsock.vreceive()
                 if (frame == None):
                     break
-
-		image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
-		if panel is None:
-			panel = tki.Label(video_win,image=image)
-			panel.image = image
-			panel.pack(side="left", padx=10, pady=10)
-		else:
-			panel.configure(image=image)
-			panel.image = image
-
+                image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
+                if panel is None:
+                	panel = tk.Label(root,image=image)
+                	panel.image = image
+                	panel.pack(side="left", padx=10, pady=10); root.update()
+                else:
+                	panel.configure(image=image)
+                	panel.image = image; root.update()
         except:
             pass
         win.deiconify()
@@ -122,15 +117,16 @@ thread_daemon.start()
 # Tkinter stuff
 root = tk.Tk()
 root.title("Chat Client")
+root.wm_protocol("WM_DELETE_WINDOW", onClose)
 win = tk.Toplevel()
 video_win = tk.Toplevel()
+video_win.withdraw()
 panel = None
 
 ip = ''
 entry_ip = tk.Entry(win) # IP entry
 button_connect = tk.Button(win, text = 'Connect To', command = lambda: connectTo()) # Connect to IP
 entry_ip.pack(); button_connect.pack();
-root.withdraw()
 
 root.after(0, constantlyCheck)
 root.mainloop()

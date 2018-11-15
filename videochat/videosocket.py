@@ -1,4 +1,5 @@
 import socket
+from socket import timeout
 
 class videosocket:
     '''A special type of socket to handle the sending and receiveing of fixed
@@ -12,7 +13,7 @@ class videosocket:
         else:
             self.sock = sock
         self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        self.sock.settimeout(5)
+        self.sock.settimeout(20)
 
     def connect(self,host,port):
         self.sock.connect((host,port))
@@ -26,9 +27,8 @@ class videosocket:
         while metasent < 8 :
             try:
                 sent = self.sock.send(lengthstr[metasent:])
-            except TimeoutException:
-                return ("Timeout")
-                raise RuntimeError("Timeout")
+            except timeout:
+                return (None)
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
             metasent += sent
@@ -37,9 +37,8 @@ class videosocket:
         while totalsent < length :
             try:
                 sent = self.sock.send(framestring[totalsent:])
-            except TimeoutException:
-                return ("Timeout")
-                raise RuntimeError("Timeout")
+            except timeout:
+                return (None)
             if sent == 0:
                 raise RuntimeError("Socket connection broken")
             totalsent += sent
@@ -52,9 +51,8 @@ class videosocket:
         while metarec < 8:
             try:
                 chunk = self.sock.recv(8 - metarec)
-            except TimeoutException:
-                return ("Timeout")
-                raise RuntimeError("Timeout")
+            except timeout:
+                return (None)
             if chunk == '':
                 raise RuntimeError("Socket connection broken")
             metaArray.append(chunk)
@@ -65,9 +63,8 @@ class videosocket:
         while totrec<length :
             try:
                 chunk = self.sock.recv(length - totrec)
-            except TimeoutException:
-                return ("Timeout")
-                raise RuntimeError("Timeout")
+            except timeout:
+                return (None)
             if chunk == '':
                 raise RuntimeError("Socket connection broken")
             msgArray.append(chunk)
