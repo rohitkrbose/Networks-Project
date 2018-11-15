@@ -129,6 +129,7 @@ class Client:
 
 class Master:
     def __init__(self, sIP, sPort):
+        self.var = IntVar()
         self.videoMode = 0
         self.videofeed = VideoFeed (1, "ZAMZAM", 1)
         self.vidPanel = None
@@ -185,6 +186,9 @@ class Master:
         self.root.withdraw()
         self.win_auth2.withdraw()
 
+    def sel():
+        self.videoMode = self.var.get()
+
     def postLogin(self):
         '''
             This is called after authenticate_otp
@@ -203,19 +207,18 @@ class Master:
         self.dummySocket.send(msg.encode('utf-8'))
         print(self.dummySocket.recv(2048).decode('utf-8'))
 
-        self.var = IntVar()
 
         # CONNECT SHIT
-        R1 = Radiobutton(root, text="None", variable=var, value=1, command=sel)
-        R1.pack( anchor = W )
-        R2 = Radiobutton(root, text= "Hat", variable=var, value=2, command=sel)
-        R2.pack( anchor = W )
-        R3 = Radiobutton(root, text="Moustache", variable=var, value=3, command=sel)
-        R3.pack( anchor = W)
-        R4 = Radiobutton(root, text="Ha-stache", variable=var, value=3, command=sel)
-        R4.pack( anchor = W)
-        R4 = Radiobutton(root, text="Doggy Style", variable=var, value=3, command=sel)
-        R4.pack( anchor = W)
+        R1 = Radiobutton(connWindow, text="None", variable=self.var, value=0, command=self.sel)
+        R1.pack()
+        R2 = Radiobutton(connWindow, text= "Hat", variable=self.var, value=1, command=self.sel)
+        R2.pack()
+        R3 = Radiobutton(connWindow, text="Moustache", variable=self.var, value=2, command=self.sel)
+        R3.pack()
+        R4 = Radiobutton(connWindow, text="Ha-stache", variable=self.var, value=3, command=self.sel)
+        R4.pack()
+        R5 = Radiobutton(connWindow, text="Doggy Style", variable=self.var, value=4, command=self.sel)
+        R5.pack()
 
 
     def authenticate_email(self):
