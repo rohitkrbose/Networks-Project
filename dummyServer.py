@@ -1,7 +1,7 @@
 import socket, videosocket
 import sys
 import threading
-from videofeed import VideoFeed
+# from videofeed import VideoFeed
 
 class Dummy:
     def __init__(self, port):
