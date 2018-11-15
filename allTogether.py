@@ -2,8 +2,9 @@ import Tkinter as tk
 import tkMessageBox
 import auth # Imports auth
 import sys # Imports sys, used to end the program later
-import socket
+import socket, videosocket
 from threading import Thread
+from videofeed1 import VideoFeed
 
 # This file is for the client
 
@@ -51,6 +52,7 @@ class Server:
                 frame = master.videofeed.get_frame()
                 vsock.vsend(frame)
         except Exception as e:
+            print (e)
             print ('Some issue!')
         master.onClose()
         master.connWindow.deiconify()
@@ -86,14 +88,17 @@ class Client:
                     master.vidPanel.image = image; 
                     master.vidWindow.update()
         except Exception as e:
+            print (e)
             print ('Some issue!')
         master.onClose()
         master.connWindow.deiconify()
 
     def connectToDummy (self,msg=''): # Connect to
-        msg = "CONNECT, " + master.entry_username.get()
+        msg = "CONNECT," + master.entry_username.get()
+        print (msg)
         master.dummySocket.send(msg.encode('utf-8'))
-        r_msg = master.dummmySocket.recv().decode('utf-8')
+        r_msg = master.dummySocket.recv(2048).decode('utf-8')
+        print (r_msg)
         if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'): # Connection successful
             self.connectToOtherClient(ip_addr=r_msg)
             msg = "CONNECTME, " + master.email
@@ -101,12 +106,12 @@ class Client:
         
 
 class Master:
-    def __init__(self, sIP):
-        print ('GALU')
+    def __init__(self, sIP, sPort):
+        self.videofeed = VideoFeed (1, "ZAMZAM", 1)
         self.dummyIP = sIP
         self.dummySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.dummySocket.connect((self.dummyIP,7000))
+            self.dummySocket.connect((self.dummyIP,sPort))
             pass
         except:
             print "Server Port/IP unavailable/incorrect"
@@ -118,9 +123,8 @@ class Master:
         self.videoRunning = True
         self.U_client_socket = None
         self.U_address = None
-        self.videofeed = None
 
-    def onClose ():
+    def onClose (self):
         self.videofeed.cam.release()
         del self.videofeed
         self.videofeed = VideoFeed (1, "ZAMZAM", 1)
@@ -208,12 +212,12 @@ class Master:
 
     def connectTo(self): # I am the client!
         ip = self.entry_username.get()
-        result = self.client.connect(ip) # Initiate video chat as client
+        result = client.connectToDummy(ip) # Initiate video chat as client
         if (result != None):
             tkMessageBox.showerror("Error", "Nobody there!")
 
 
-master = Master(sys.argv[1]) # send server IP
+master = Master(sys.argv[1],int(sys.argv[2])) # send server IP
 master.first_pages()
 root = master.root
 daemon = Daemon()

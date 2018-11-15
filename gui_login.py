@@ -1,5 +1,5 @@
-import tkinter as tk
-from tkinter import messagebox
+import Tkinter as tk
+import tkMessageBox
 import auth # Imports auth
 import sys # Imports sys, used to end the program later
 
@@ -12,7 +12,7 @@ def authenticate_email():
 		win_auth2.deiconify() # Unhides OTP window
 		otp = auth.send_OTP(email)
 	else:
-		messagebox.showerror("Error", "Invalid credentials!")
+		tkMessageBox.showerror("Error", "Invalid credentials!")
 
 def authenticate_otp():
 	global window_auth2
@@ -21,7 +21,7 @@ def authenticate_otp():
 		win_auth2.destroy() # Removes OTP window
 		root.deiconify() # Unhides root window
 	else:
-		messagebox.showerror("Error", "Invalid OTP!")
+		tkMessageBox.showerror("Error", "Invalid OTP!")
 
 def quit():
     win_auth1.destroy() # Removes the top level window
