@@ -52,6 +52,7 @@ class Server:
                 frame = master.videofeed.get_frame()
                 vsock.vsend(frame)
         except Exception as e:
+            print (e)
             print ('Some issue!')
         master.onClose()
         master.connWindow.deiconify()
@@ -87,12 +88,13 @@ class Client:
                     master.vidPanel.image = image; 
                     master.vidWindow.update()
         except Exception as e:
+            print (e)
             print ('Some issue!')
         master.onClose()
         master.connWindow.deiconify()
 
     def connectToDummy (self,msg=''): # Connect to
-        msg = "CONNECT, " + master.entry_username.get()
+        msg = "CONNECT," + master.entry_username.get()
         print (msg)
         master.dummySocket.send(msg.encode('utf-8'))
         r_msg = master.dummySocket.recv(2048).decode('utf-8')
@@ -105,7 +107,7 @@ class Client:
 
 class Master:
     def __init__(self, sIP, sPort):
-        print ('GALU')
+        self.videofeed = VideoFeed (1, "ZAMZAM", 1)
         self.dummyIP = sIP
         self.dummySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -121,9 +123,8 @@ class Master:
         self.videoRunning = True
         self.U_client_socket = None
         self.U_address = None
-        self.videofeed = None
 
-    def onClose ():
+    def onClose (self):
         self.videofeed.cam.release()
         del self.videofeed
         self.videofeed = VideoFeed (1, "ZAMZAM", 1)
