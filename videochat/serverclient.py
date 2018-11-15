@@ -1,6 +1,8 @@
 import socket, videosocket
 from videofeed1 import VideoFeed
 from threading import Thread,Timer
+from PIL import Image
+from PIL import ImageTk
 import Tkinter as tk
 import tkMessageBox
 import StringIO
@@ -28,30 +30,39 @@ class Daemon:
 
 class Server:
     def connect(self):
-        global haveConnection, U_client_socket, U_address
+        global haveConnection, U_client_socket, U_address, root, video_win, panel
         client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         videofeed = VideoFeed(1,"Server",1)
         tkMessageBox.showerror("Info", "Press \'q\' to quit!")
         try:
             while (True):
-                key=cv2.waitKey(1) & 0xFF
+                key = cv2.waitKey(2) & 0xFF
                 if key == ord('q'):
                     break
                 frame = vsock.vreceive()
-                videofeed.set_frame(frame)
+
+                image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
+                if panel is None:
+			panel = tki.Label(video_win,image=image)
+			panel.image = image
+			panel.pack(side="left", padx=10, pady=10)
+		else:
+			panel.configure(image=image)
+			panel.image = image
+
                 frame = videofeed.get_frame()
                 if (frame == None):
                     break
                 vsock.vsend(frame)
         except:
-            pass
+            print ('Some issue!')
+            root.destroy()
         win.deiconify()
-        del videofeed
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
-        global win
+        global win, video_win, panel
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip_addr, 6000))
@@ -63,7 +74,7 @@ class Client:
         videofeed = VideoFeed(1,"Client",1)
         try:
             while (True):
-                key=cv2.waitKey(1) & 0xFF
+                key = cv2.waitKey(1) & 0xFF
                 if key == ord('q'):
                     break
                 frame = videofeed.get_frame()
@@ -71,11 +82,19 @@ class Client:
                 frame = vsock.vreceive()
                 if (frame == None):
                     break
-                videofeed.set_frame(frame)
+
+		image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
+		if panel is None:
+			panel = tki.Label(video_win,image=image)
+			panel.image = image
+			panel.pack(side="left", padx=10, pady=10)
+		else:
+			panel.configure(image=image)
+			panel.image = image
+
         except:
             pass
         win.deiconify()
-        del videofeed
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
     global haveConnection, server, win
@@ -104,6 +123,9 @@ thread_daemon.start()
 root = tk.Tk()
 root.title("Chat Client")
 win = tk.Toplevel()
+video_win = tk.Toplevel()
+panel = None
+
 ip = ''
 entry_ip = tk.Entry(win) # IP entry
 button_connect = tk.Button(win, text = 'Connect To', command = lambda: connectTo()) # Connect to IP

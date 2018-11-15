@@ -15,13 +15,6 @@ class VideoFeed:
     def get_frame(self):
         ret_val, img = self.cam.read()
         c = cv2.waitKey(1)
-        if (c == "n"): #in "n" key is pressed while the popup window is in focus
-            self.camera_index += 1 #try the next camera index
-            self.cam = cv2.VideoCapture(self.camera_index)
-            if not self.cam: #if the next camera index didn't work, reset to 0.
-                self.camera_index = 0
-                self.cam = cv2.VideoCapture(self.camera_index)
-
         cv2_im = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         pil_im = Image.fromarray(cv2_im)
         b = io.BytesIO()
@@ -33,8 +26,8 @@ class VideoFeed:
         pil_bytes = io.BytesIO(frame_bytes)
         pil_image = Image.open(pil_bytes)
         cv_image = cv2.cvtColor(numpy.array(pil_image), cv2.COLOR_RGB2BGR)
-        cv2.imshow(self.name, cv_image)
-        # return Image.from_array(cv_image)
+        # cv2.imshow(self.name, cv_image)
+        return (cv_image)
 
 if __name__=="__main__":
     vf = VideoFeed(1,"test",1)
