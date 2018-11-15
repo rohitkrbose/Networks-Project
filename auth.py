@@ -29,8 +29,8 @@ def send_OTP (email):
 	# Send OTP to mail
 	s = smtplib.SMTP('mmtp.iitk.ac.in', 25)
 	s.login('rohitkb', base64.b64decode('Vm9ydGV4MTIz').decode("utf-8"))
-	# otp = str(np.random.randint(10000,100000))
-	otp = '12345'
+	otp = str(np.random.randint(10000,100000))
+	# otp = '12345'
 	s.sendmail('rohitkb@iitk.ac.in', email, otp)
 	s.quit()
 	return (otp)
