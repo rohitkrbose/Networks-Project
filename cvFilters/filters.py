@@ -10,20 +10,15 @@ import numpy as np
 import os
 import subprocess
 
-cascPath = "haarcascade_frontalface_default.xml"  # for face detection
-
-if not os.path.exists(cascPath):
-    subprocess.call(['./download_filters.sh'])
-else:
-    print('Filters already exist!')
+cascPath = "cvFilters/haarcascade_frontalface_default.xml"  # for face detection
 
 faceCascade = cv2.CascadeClassifier(cascPath)
 log.basicConfig(filename='webcam.log',level=log.INFO)
 
 anterior = 0
-mst = cv2.imread('moustache.png')
-hat = cv2.imread('cowboy_hat.png')
-dog = cv2.imread('dog_filter.png')
+mst = cv2.imread('cvFilters/moustache.png')
+hat = cv2.imread('cvFilters/cowboy_hat.png')
+dog = cv2.imread('cvFilters/dog_filter.png')
 
 
 def put_moustache(mst,fc,x,y,w,h):
