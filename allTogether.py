@@ -5,6 +5,15 @@ import sys # Imports sys, used to end the program later
 import socket, videosocket
 from threading import Thread
 from videofeed1 import VideoFeed
+import socket, videosocket
+from videofeed1 import VideoFeed
+from threading import Thread,Timer
+from PIL import Image
+from PIL import ImageTk
+import Tkinter as tk
+import tkMessageBox
+import StringIO
+import cv2
 
 # This file is for the client
 
@@ -108,6 +117,7 @@ class Client:
 class Master:
     def __init__(self, sIP, sPort):
         self.videofeed = VideoFeed (1, "ZAMZAM", 1)
+        self.vidPanel = None
         self.dummyIP = sIP
         self.dummySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -166,8 +176,8 @@ class Master:
         '''
         self.connWindow = tk.Toplevel();
         self.vidWindow = tk.Toplevel();
-        self.entry_username = tk.Entry(self.vidWindow) # IP entry
-        self.button_connect = tk.Button(self.vidWindow, text = 'Connect To', command = lambda: self.connectTo()) # Connect to IP
+        self.entry_username = tk.Entry(self.connWindow) # IP entry
+        self.button_connect = tk.Button(self.connWindow, text = 'Connect To', command = lambda: self.connectTo()) # Connect to IP
 
         self.entry_username.pack()
         self.button_connect.pack()
@@ -207,7 +217,7 @@ class Master:
         if (self.haveConnection == True): # If daemon listened to some shit
             # win.withdraw()  # Hide the Connect To window
             self.haveConnection = False
-            self.server.connect() # Initiate video chat as server
+            server.connect() # Initiate video chat as server
         self.root.after(2, self.constantlyCheck) # Run this function again after 2 seconds
 
     def connectTo(self): # I am the client!
@@ -223,4 +233,5 @@ root = master.root
 daemon = Daemon()
 server = Server()
 client = Client()
+root.after(0, master.constantlyCheck)
 root.mainloop() # Starts the event loop for the main window
