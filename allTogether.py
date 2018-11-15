@@ -132,9 +132,9 @@ class Client:
             master.dummySocket.send(msg.encode('utf-8'))
             r_msg = master.dummySocket.recv(2048).decode('utf-8')
         elif (r_msg == 'NOT AVAILABLE'):
-            tkMessageBox.showerror("Error", msg + " is unavailable.")
+            tkMessageBox.showerror("Error", u + " is unavailable.")
         else:
-            tkMessageBox.showerror("Error", msg + " is busy.")
+            tkMessageBox.showerror("Error", u + " is busy.")
         
 
 class Master:
