@@ -10,11 +10,12 @@ class Server:
         print "TCPServer Waiting for client on port 6000"
 
     def start(self):
-        while 1:
+        while True:
             client_socket, address = self.server_socket.accept()
             print "I got a connection from ", address
             vsock = videosocket.videosocket(client_socket)
             while True:
+                print ('asdasd')
                 frame = vsock.vreceive()
                 self.videofeed.set_frame(frame)
                 frame = self.videofeed.get_frame()

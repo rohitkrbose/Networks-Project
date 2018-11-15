@@ -2,8 +2,9 @@ import Tkinter as tk
 import tkMessageBox
 import auth # Imports auth
 import sys # Imports sys, used to end the program later
-import socket
+import socket, videosocket
 from threading import Thread
+from videofeed1 import VideoFeed
 
 # This file is for the client
 
@@ -92,8 +93,10 @@ class Client:
 
     def connectToDummy (self,msg=''): # Connect to
         msg = "CONNECT, " + master.entry_username.get()
+        print (msg)
         master.dummySocket.send(msg.encode('utf-8'))
-        r_msg = master.dummmySocket.recv().decode('utf-8')
+        r_msg = master.dummySocket.recv(2048).decode('utf-8')
+        print (r_msg)
         if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'): # Connection successful
             self.connectToOtherClient(ip_addr=r_msg)
             msg = "CONNECTME, " + master.email
@@ -101,12 +104,12 @@ class Client:
         
 
 class Master:
-    def __init__(self, sIP):
+    def __init__(self, sIP, sPort):
         print ('GALU')
         self.dummyIP = sIP
         self.dummySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.dummySocket.connect((self.dummyIP,7000))
+            self.dummySocket.connect((self.dummyIP,sPort))
             pass
         except:
             print "Server Port/IP unavailable/incorrect"
@@ -208,12 +211,12 @@ class Master:
 
     def connectTo(self): # I am the client!
         ip = self.entry_username.get()
-        result = self.client.connect(ip) # Initiate video chat as client
+        result = client.connectToDummy(ip) # Initiate video chat as client
         if (result != None):
             tkMessageBox.showerror("Error", "Nobody there!")
 
 
-master = Master(sys.argv[1]) # send server IP
+master = Master(sys.argv[1],int(sys.argv[2])) # send server IP
 master.first_pages()
 root = master.root
 daemon = Daemon()
