@@ -14,7 +14,7 @@ import Tkinter as tk
 import tkMessageBox
 import StringIO
 import cv2
-from cvFilters.filters import *
+from cvFilters.filters import get_Frame
 # This file is for the client
 
 class Daemon:
