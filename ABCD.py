@@ -45,7 +45,10 @@ class Server:
         try:
             master.vidWindow.deiconify()
             while (True):
-                frame = vsock.vreceive()
+                if (master.acceptFlag == 2):
+                    frame = None
+                else:
+                    frame = vsock.vreceive()
                 if (frame == None):
                     raise Exception
                 image = ImageTk.PhotoImage(Image.fromarray(master.videofeed.set_frame(frame)))
@@ -107,8 +110,6 @@ class Client:
 
 class Master:
     def __init__(self, sIP, sPort):
-        self.videofeed = VideoFeed (1, "ZAMZAM", 1)
-        self.vidPanel = None
         self.dummyIP = sIP
         self.dummySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -121,9 +122,14 @@ class Master:
         self.root = tk.Tk() # Declares root as the tkinter main window
         self.root.title("Chat Client")
         self.haveConnection = False
+        self.acceptFlag = 0
         self.videoRunning = True
         self.U_client_socket = None
         self.U_address = None
+        self.vidPanel = None
+        self.callWindow = None
+
+        self.videofeed = VideoFeed (1, "ZAMZAM", 1)
 
     def onClose (self):
         self.videofeed.cam.release()
@@ -137,6 +143,7 @@ class Master:
         self.dummySocket.send(msg.encode('utf-8'))
         self.dummySocket.recv(2048).decode('utf-8')
         self.vidPanel = None
+        self.acceptFlag = 0
 
 
     def first_pages(self):
@@ -172,17 +179,35 @@ class Master:
         '''
         self.connWindow = tk.Toplevel();
         self.vidWindow = tk.Toplevel();
+        self.callWindow = tk.Toplevel();
+        self.callLabel = tk.Label(self.callWindow,text='Incoming call!')
         self.entry_username = tk.Entry(self.connWindow) # IP entry
+        self.button_endEverything = tk.Button(self.connWindow, text = 'Quit', command = lambda: self.endEverything())
         self.button_connect = tk.Button(self.connWindow, text = 'Connect To', command = lambda: self.connectTo()) # Connect to IP
+        self.button_acceptCall = tk.Button(self.callWindow, text = "Accept", command = lambda: self.dealCall(True))
+        self.button_rejectCall = tk.Button(self.callWindow, text = "Reject", command = lambda: self.dealCall(False))
 
         self.entry_username.pack()
         self.button_connect.pack()
-        self.vidWindow.deiconify()
+        self.button_acceptCall.pack(); self.button_rejectCall.pack();
+        self.button_endEverything.pack();
+        self.vidWindow.withdraw()  # hide window
+        self.callWindow.withdraw() # hide window
 
         # Send CONNECTME to dummyserver
         msg = "CONNECTME," + self.email
         self.dummySocket.send(msg.encode('utf-8'))
         print(self.dummySocket.recv(2048).decode('utf-8'))
+
+    def dealCall (flag):
+        if (flag == True):
+            msg = "ACCEPT"
+            self.acceptFlag = 1
+        else:
+            msg = "REJECT"
+            self.acceptFlag = 2
+        self.callWindow.withdraw()
+        self.dummySocket.send(msg.encode('utf-8'))
 
     def authenticate_email(self):
         self.email = self.entry_email.get()
@@ -203,11 +228,15 @@ class Master:
             tkMessageBox.showerror("Error", "Invalid OTP!")
 
     def quit(self):
-        self.win_auth1.destroy() # Removes the top level window
+        self.root.destroy() # Removes the top level window
 
     def constantlyCheck(self): # I am the server! This is a helper function for the daemon.
         # Here we should have an option: To reject or to accept. Only accept code is written here.
         if (self.haveConnection == True): # If daemon listened to some shit
+            self.callWindow.deiconify()
+            self.connWindow.withdraw()
+            while (not self.acceptFlag):
+                self.acceptFlag = self.acceptFlag
             self.haveConnection = False
             server.connect() # Initiate video chat as server
         self.root.after(2, self.constantlyCheck) # Run this function again after 2 seconds
@@ -218,6 +247,11 @@ class Master:
         if (result != None):
             tkMessageBox.showerror("Error", "Nobody there!")
 
+    def endEverything (self):
+        msg = 'DISCONNECTME,' + self.email
+        self.dummySocket.send(msg.encode('utf-8'))
+        self.root.destroy()
+        sys.exit(0)
 
 master = Master(sys.argv[1],int(sys.argv[2])) # send server IP
 master.first_pages()
