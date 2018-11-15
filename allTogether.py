@@ -6,7 +6,7 @@ import socket, videosocket
 from threading import Thread
 from videofeed1 import VideoFeed
 import socket, videosocket
-from videofeed1 import VideoFeed
+from videofeed import VideoFeed
 from threading import Thread,Timer
 from PIL import Image
 from PIL import ImageTk
