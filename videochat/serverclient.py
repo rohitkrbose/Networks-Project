@@ -13,9 +13,10 @@ U_client_socket = U_address = None
 videofeed = VideoFeed(1,"ZAMZAM",1)
 
 def onClose ():
-    global root
+    global video_win
+    print ('XYZ')
     videofeed.cam.release()
-    root.quit()
+    video_win.destroy()
 
 class Daemon:
     def __init__(self):
@@ -45,10 +46,10 @@ class Server:
                 frame = vsock.vreceive()
                 image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
                 if panel is None:
-                    panel = tk.Label(root,image=image)
+                    panel = tk.Label(video_win,image=image)
                     panel.image = image
                     panel.pack(side="left", padx=10, pady=10)
-                    root.update()
+                    video_win.update()
                 else:
         			panel.configure(image=image)
         			panel.image = image; root.update()
@@ -81,7 +82,7 @@ class Client:
                     break
                 image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
                 if panel is None:
-                	panel = tk.Label(root,image=image)
+                	panel = tk.Label(video_win,image=image)
                 	panel.image = image
                 	panel.pack(side="left", padx=10, pady=10); root.update()
                 else:
@@ -117,9 +118,9 @@ thread_daemon.start()
 # Tkinter stuff
 root = tk.Tk()
 root.title("Chat Client")
-root.wm_protocol("WM_DELETE_WINDOW", onClose)
 win = tk.Toplevel()
 video_win = tk.Toplevel()
+video_win.wm_protocol("WM_DELETE_WINDOW", onClose)
 video_win.withdraw()
 panel = None
 
@@ -130,3 +131,4 @@ entry_ip.pack(); button_connect.pack();
 
 root.after(0, constantlyCheck)
 root.mainloop()
+root.withdraw()
