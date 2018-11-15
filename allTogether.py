@@ -2,40 +2,37 @@ import Tkinter as tk
 import tkMessageBox
 import auth # Imports auth
 import sys # Imports sys, used to end the program later
+import socket
+import Thread
 
 # This file is for the client
 
 class Daemon:
-    def __init__(self, dsock, masterObj):
+    def __init__(self):
         self.daemon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.daemon_socket.bind(("", 6001))
+        self.daemon_socket.bind(("", 6000))
         self.daemon_socket.listen(5)
-        print "TCPServer Waiting for Client on port 6001"
+        print "TCPServer Waiting for Client on port 6000"
         thread_daemon = Thread(target = self.start)
         thread_daemon.start()
-
-        self.masterObj = masterObj
-        self.dsock = dsock
 
     def start(self):
         while True:
             cs, addr = self.daemon_socket.accept()
-            if (self.masterObj.haveConnection == True): # if it is already engaged with someone, ignore the new request
+            if (master.haveConnection == True): # if it is already engaged with someone, ignore the new request
                 continue
-            
-            self.masterObj.haveConnection = True # if it is not engaged, set this flag variable to true
-            self.masterObj.U_client_socket = cs; 
-            self.masterObj.U_address = addr; # store client_socket and client address in global variables, as this is a thread
+            master.haveConnection = True # if it is not engaged, set this flag variable to true
+            master.U_client_socket = cs; 
+            master.U_address = addr; # store client_socket and client address in global variables, as this is a thread
             print "I got a connection from ", addr
 
 class Server:
-    def __init__(self, dsock, masterObj):
-        self.dummySock = dsock
-        self.masterObj = masterObj
+    def __init__(self):
 
     def connect(self):
-        global haveConnection, U_client_socket, U_address
-        client_socket, address = U_client_socket, U_address # retrieve info from global variables (changes made by Daemon)
+        # global haveConnection, U_client_socket, U_address
+        client_socket, address = master.U_client_socket, master.U_address # retrieve info from global variables (changes made by Daemon)
+        if (address == )
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         # quit_win.deiconify()
         videofeed = VideoFeed(1,"Server",1)
@@ -52,46 +49,62 @@ class Server:
             print("Some Exception")
 
 class Client:
-    def __init__(self, dsock, masterObj):
-        self.dummySock = dsock
-        self.masterObj = masterObj
-
-    def connect(self, ip_addr = "127.0.0.1"):
-        global win
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            client_socket.connect((ip_addr, 6000))
-        except:
-            return ('Unavailable') # if Client can't get a connection to that IP
-
-        # win.withdraw() # Hide the Connect To window
-        # quit_win.deiconify()
-        vsock = videosocket.videosocket(client_socket) # establish a video connection
-        videofeed = VideoFeed(1,"Client",1)
-        try:
-            while (videoRunning):
-                frame = videofeed.get_frame()
-                vsock.vsend(frame)
-                frame = vsock.vreceive()
-                # videofeed.set_frame(frame)
-                root.set_frame(frame)
-        except AttributeError as e:
-            print("Some Exception")
-
-class Master:
     def __init__(self):
 
+    def connectToOtherClient(self, ip_addr = "127.0.0.1"):
+        # global win, video_win, panel, root, videofeed
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # the other guy/gal
+        client_socket.connect((ip_addr, 6000))  
+        master.connWindow.withdraw() # Hide the Connect To window
+        tkMessageBox.showinfo("Info", "Connection successful!")
+        vsock = videosocket.videosocket(client_socket) # establish a video connection
+        try:
+            master.vidWindow.deiconify()
+            while (True):
+                frame = master.videofeed.get_frame()
+                vsock.vsend(frame)
+                frame = vsock.vreceive()
+                if (frame == None):
+                    raise Exception # Timeout
+                image = ImageTk.PhotoImage(Image.fromarray(master.videofeed.set_frame(frame)))
+                if master.vidPanel is None: # first frame
+                    master.vidPanel = tk.Label(master.vidWindow,image=image)
+                    master.vidPanel.image = image
+                    master.vidPanel.pack(side="left", padx=10, pady=10); master.vidWindow.update()
+                else:
+                    master.vidPanel.configure(image=image)
+                    master.vidPanel.image = image; 
+                    master.vidWindow.update()
+        except Exception as e:
+            print (e)
+            print ('Some issue!'); onClose()
+        win.deiconify()
+
+    def connectToDummy (self, msg=""): # Connect to
+        msg = "CONNECT, " + master.entry_username.get()
+        master.dummySocket.send(msg.encode('utf-8'))
+        r_msg = master.dummmySocket.recv().decode('utf-8')
+        if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'):
+            self.connectToOtherClient(ip_addr=r_msg)
+        # Deal with this later!!!
+
+class Master:
+    def __init__(self, sIP):
+        self.dummyIP = sIP
+        self.dummmySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.dummySocket.connect((sIp,sPort))
+        except:
+            print "Server Port/IP unavailable/incorrect"
+            sys.exit(0)
+        
         # Tk Stuff
         self.root = tk.Tk() # Declares root as the tkinter main window
         self.root.title("Chat Client")
-
         self.haveConnection = False
         self.videoRunning = True
         self.U_client_socket = None
         self.U_address = None
-
-        self.client = None
-        self.server = None
 
     def first_pages(self):
         # Variables used everywhere
@@ -127,11 +140,12 @@ class Master:
         '''
             This is called after authenticate_otp
         '''
+        self.connWindow = tk.TopLevel();
         self.vidWindow = tk.Toplevel();
-        self.entry_ip = tk.Entry(self.vidWindow) # IP entry
+        self.entry_username = tk.Entry(self.vidWindow) # IP entry
         self.button_connect = tk.Button(self.vidWindow, text = 'Connect To', command = lambda: self.connectTo()) # Connect to IP
 
-        self.entry_ip.pack()
+        self.entry_username.pack()
         self.button_connect.pack()
         self.vidWindow.deiconify()
 
@@ -168,27 +182,18 @@ class Master:
         self.root.after(2, self.constantlyCheck) # Run this function again after 2 seconds
 
     def connectTo(self): # I am the client!
-        ip = self.entry_ip.get()
+        ip = self.entry_username.get()
         result = self.client.connect(ip) # Initiate video chat as client
         if (result != None):
             tkMessageBox.showerror("Error", "Nobody there!")
 
 
 if __name__ == '__main__':
-    masterObj = Master()
-    masterObj.first_pages()
-    root = masterObj.root
-    
-    sIp = sys.argv[1] # server IP
-    sPort = sys.argv[2] # server Port
-    dummmySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        dummySocket.connect((sIp,sPort))
-    except:
-        print "Server Port/IP unavailable/incorrect"
-
-    daemon = Daemon(dummySocket, masterObj)
-    masterObj.server = Server(dummySocket, masterObj)
-    masterObj.client = Client(dummySocket, masterObj)
+    master = Master(sys.argv[1]) # send server IP
+    master.first_pages()
+    root = master.root
+    daemon = Daemon()
+    server = Server(dummySocket)
+    client = Client(dummySocket)
 
     root.mainloop() # Starts the event loop for the main window
