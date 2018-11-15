@@ -4,7 +4,6 @@ import auth # Imports auth
 import sys # Imports sys, used to end the program later
 import socket, videosocket
 from threading import Thread
-from videofeed1 import VideoFeed
 import socket, videosocket
 from videofeed import VideoFeed
 from threading import Thread,Timer
@@ -131,10 +130,10 @@ class Client:
             msg = "CONNECTME," + master.email
             master.dummySocket.send(msg.encode('utf-8'))
             r_msg = master.dummySocket.recv(2048).decode('utf-8')
-        # elif (r_msg == 'NOT AVAILABLE'):
-        #     tkMessageBox.showerror("Error", u + " is unavailable.")
-        # else:
-        #     tkMessageBox.showerror("Error", u + " is busy.")
+        elif (r_msg == 'NOT AVAILABLE'):
+            tkMessageBox.showerror("Error", u + " is unavailable.")
+        else:
+            tkMessageBox.showerror("Error", u + " is busy.")
         
 
 class Master:
