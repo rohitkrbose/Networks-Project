@@ -199,6 +199,7 @@ class Master:
 
     def sel(self):
         self.videoMode = self.var.get()
+        # print (self.videoMode)
 
     def postLogin(self):
         '''

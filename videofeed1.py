@@ -29,8 +29,8 @@ class VideoFeed:
         # if (frame_bytes == None):
         #     print ('Set frame none')
         pil_image = Image.open(pil_bytes)
-        cv_image = numpy.asarray(pil_image.convert('RGB'))
-        # cv_image = cv2.cvtColor(numpy.array(pil_image), cv2.COLOR_RGB2BGR)
+        # cv_image = numpy.asarray(pil_image.convert('RGB'))
+        cv_image = cv2.cvtColor(numpy.array(pil_image), cv2.COLOR_RGB2BGR)
         # cv2.imshow(self.name, cv_image)
         return (cv_image)
 

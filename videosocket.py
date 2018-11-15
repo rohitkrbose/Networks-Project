@@ -13,7 +13,7 @@ class videosocket:
         else:
             self.sock = sock
         self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        self.sock.settimeout(5)
+        self.sock.settimeout(10)
 
     def connect(self,host,port):
         self.sock.connect((host,port))
