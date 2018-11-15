@@ -15,7 +15,6 @@ cascPath = "cvFilters/haarcascade_frontalface_default.xml"  # for face detection
 faceCascade = cv2.CascadeClassifier(cascPath)
 log.basicConfig(filename='webcam.log',level=log.INFO)
 
-anterior = 0
 mst = cv2.imread('cvFilters/moustache.png')
 hat = cv2.imread('cvFilters/cowboy_hat.png')
 dog = cv2.imread('cvFilters/dog_filter.png')
@@ -103,11 +102,6 @@ def get_Frame(frame, ch):
         else:
             frame = put_dog_filter(dog,frame,x,y,w,h)
             
-            
-    if anterior != len(faces):
-        anterior = len(faces)
-        log.info("faces: "+str(len(faces))+" at "+str(dt.datetime.now()))
-
     return frame
     # Display the resulting frame
     # cv2.imshow('Video', frame)
