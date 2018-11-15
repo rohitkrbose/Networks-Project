@@ -105,14 +105,11 @@ class Master:
         print ('GALU')
         self.dummyIP = sIP
         self.dummySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # print (self.dummyIP)
         try:
             self.dummySocket.connect((self.dummyIP,7000))
             pass
         except:
             print "Server Port/IP unavailable/incorrect"
-
-        # self.dummySocket = ''
         
         # Tk Stuff
         self.root = tk.Tk() # Declares root as the tkinter main window
@@ -175,7 +172,7 @@ class Master:
         # Send CONNECTME to dummyserver
         msg = "CONNECTME," + self.email
         self.dummySocket.send(msg.encode('utf-8'))
-        print(self.dummySocket.rcv(2048).decode('utf-8'))
+        print(self.dummySocket.recv(2048).decode('utf-8'))
 
     def authenticate_email(self):
         self.email = self.entry_email.get()
