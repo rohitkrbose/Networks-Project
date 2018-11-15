@@ -13,10 +13,14 @@ U_client_socket = U_address = None
 videofeed = VideoFeed(1,"ZAMZAM",1)
 
 def onClose ():
-    global video_win
+    global video_win, videofeed
     print ('XYZ')
     videofeed.cam.release()
+    del videofeed
+    videofeed = VideoFeed(1,"ZAMZAM",1)
     video_win.destroy()
+    video_win = tk.Toplevel()
+    video_win.withdraw()
 
 class Daemon:
     def __init__(self):
@@ -46,6 +50,7 @@ class Server:
             while (True):
                 frame = vsock.vreceive()
                 if (frame == None):
+                    print ('ppppp')
                     raise Exception
                 image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
                 if panel is None:
@@ -61,8 +66,9 @@ class Server:
         except Exception as e:
             print (e)
             print ('Some issue!')
-            onClose()
+        onClose()
         win.deiconify()
+        panel = None
 
 class Client:
     def connect(self, ip_addr = "127.0.0.1"):
@@ -93,8 +99,10 @@ class Client:
                     panel.image = image; video_win.update()
         except Exception as e:
             print (e)
-            print ('Some issue!'); onClose()
+            print ('Some issue!')
+        onClose()
         win.deiconify()
+        panel = None
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
     global haveConnection, server, win

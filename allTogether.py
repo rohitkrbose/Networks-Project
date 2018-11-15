@@ -27,30 +27,40 @@ class Daemon:
             print "I got a connection from ", addr
 
 class Server:
-    def __init__(self):
-
     def connect(self):
         # global haveConnection, U_client_socket, U_address
         client_socket, address = master.U_client_socket, master.U_address # retrieve info from global variables (changes made by Daemon)
-        if (address == )
         vsock = videosocket.videosocket(client_socket) # establish a video connection
-        # quit_win.deiconify()
-        videofeed = VideoFeed(1,"Server",1)
+        master.connWindow.withdraw() # Hide the Connect To window
         try:
-            while (videoRunning):
+            master.vidWindow.deiconify()
+            while (True):
                 frame = vsock.vreceive()
-                print("Frame received")
-                root.set_frame(frame)
-                frame = videofeed.get_frame()
-                print("Obtained frame")
+                if (frame == None):
+                    raise Exception
+                image = ImageTk.PhotoImage(Image.fromarray(master.videofeed.set_frame(frame)))
+                if master.vidPanel is None:
+                    master.vidPanel = tk.Label(master.vidWindow,image=image)
+                    master.vidPanel.image = image
+                    master.vidPanel.pack(side="left", padx=10, pady=10)
+                    master.vidWindow.update()
+                else:
+                    master.vidPanel.configure(image=image)
+                    master.vidPanel.image = image
+                    master.vidWindow.update()
+                frame = master.videofeed.get_frame()
                 vsock.vsend(frame)
-                print("Send frame")
-        except AttributeError as e:
-            print("Some Exception")
+        except Exception as e:
+            print ('Some issue!')
+        onClose()
+        master.connWindow.deiconify()
+        self.connectExitTrigger()
+
+    def connectExitTrigger (self, msg=''): # Connect to
+        msg = "CONNECTME, " + master.email
+        master.dummySocket.send(msg.encode('utf-8'))
 
 class Client:
-    def __init__(self):
-
     def connectToOtherClient(self, ip_addr = "127.0.0.1"):
         # global win, video_win, panel, root, videofeed
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # the other guy/gal
@@ -76,17 +86,19 @@ class Client:
                     master.vidPanel.image = image; 
                     master.vidWindow.update()
         except Exception as e:
-            print (e)
-            print ('Some issue!'); onClose()
-        win.deiconify()
+            print ('Some issue!')
+        onClose()
+        master.connWindow.deiconify()
 
-    def connectToDummy (self, msg=""): # Connect to
+    def connectToDummy (self,msg=''): # Connect to
         msg = "CONNECT, " + master.entry_username.get()
         master.dummySocket.send(msg.encode('utf-8'))
         r_msg = master.dummmySocket.recv().decode('utf-8')
-        if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'):
+        if not (r_msg == 'NOT AVAILABLE' or r_msg == 'BUSY'): # Connection successful
             self.connectToOtherClient(ip_addr=r_msg)
-        # Deal with this later!!!
+            msg = "CONNECTME, " + master.email
+            master.dummySocket.send(msg.encode('utf-8'))
+        
 
 class Master:
     def __init__(self, sIP):
