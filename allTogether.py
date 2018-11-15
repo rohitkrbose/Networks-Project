@@ -11,6 +11,7 @@ from threading import Thread,Timer
 from PIL import Image
 from PIL import ImageTk
 import Tkinter as tk
+from Tkinter import *
 import tkMessageBox
 import StringIO
 import cv2
@@ -128,6 +129,7 @@ class Client:
 
 class Master:
     def __init__(self, sIP, sPort):
+        self.videoMode = 0
         self.videofeed = VideoFeed (1, "ZAMZAM", 1)
         self.vidPanel = None
         self.dummyIP = sIP
@@ -201,6 +203,21 @@ class Master:
         self.dummySocket.send(msg.encode('utf-8'))
         print(self.dummySocket.recv(2048).decode('utf-8'))
 
+        self.var = IntVar()
+
+        # CONNECT SHIT
+        R1 = Radiobutton(root, text="None", variable=var, value=1, command=sel)
+        R1.pack( anchor = W )
+        R2 = Radiobutton(root, text= "Hat", variable=var, value=2, command=sel)
+        R2.pack( anchor = W )
+        R3 = Radiobutton(root, text="Moustache", variable=var, value=3, command=sel)
+        R3.pack( anchor = W)
+        R4 = Radiobutton(root, text="Ha-stache", variable=var, value=3, command=sel)
+        R4.pack( anchor = W)
+        R4 = Radiobutton(root, text="Doggy Style", variable=var, value=3, command=sel)
+        R4.pack( anchor = W)
+
+
     def authenticate_email(self):
         self.email = self.entry_email.get()
         pw = self.entry_pw.get()
@@ -235,6 +252,7 @@ class Master:
 
     def connectTo(self): # I am the client!
         ip = self.entry_username.get()
+        self.videoMode = self.var.get()
         result = client.connectToDummy(ip) # Initiate video chat as client
         if (result != None):
             tkMessageBox.showerror("Error", "Nobody there!")
