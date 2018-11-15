@@ -42,6 +42,7 @@ class Server:
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         tkMessageBox.showerror("Info", "Press \'q\' to quit!")
         try:
+            video_win.deiconify()
             while (True):
                 frame = vsock.vreceive()
                 image = ImageTk.PhotoImage(Image.fromarray(videofeed.set_frame(frame)))
@@ -52,7 +53,7 @@ class Server:
                     video_win.update()
                 else:
         			panel.configure(image=image)
-        			panel.image = image; root.update()
+        			panel.image = image; video_win.update()
                 frame = videofeed.get_frame()
                 if (frame == None):
                     break
@@ -60,6 +61,7 @@ class Server:
         except Exception as e:
         	print (e)
         	print ('Some issue!')
+            onClose()
         win.deiconify()
 
 class Client:
@@ -74,6 +76,7 @@ class Client:
         tkMessageBox.showerror("Info", "Press \'q\' to quit!")
         vsock = videosocket.videosocket(client_socket) # establish a video connection
         try:
+            video_win.deiconify()
             while (True):
                 frame = videofeed.get_frame()
                 vsock.vsend(frame)
@@ -84,12 +87,14 @@ class Client:
                 if panel is None:
                 	panel = tk.Label(video_win,image=image)
                 	panel.image = image
-                	panel.pack(side="left", padx=10, pady=10); root.update()
+                	panel.pack(side="left", padx=10, pady=10); video_win.update()
                 else:
                 	panel.configure(image=image)
-                	panel.image = image; root.update()
-        except:
-            pass
+                	panel.image = image; video_win.update()
+        except Exception as e:
+            print (e)
+            print ('Some issue!')
+            onClose()
         win.deiconify()
 
 def constantlyCheck (): # I am the server! This is a helper function for the daemon.
@@ -122,6 +127,7 @@ win = tk.Toplevel()
 video_win = tk.Toplevel()
 video_win.wm_protocol("WM_DELETE_WINDOW", onClose)
 video_win.withdraw()
+root.withdraw()
 panel = None
 
 ip = ''
@@ -131,4 +137,3 @@ entry_ip.pack(); button_connect.pack();
 
 root.after(0, constantlyCheck)
 root.mainloop()
-root.withdraw()
