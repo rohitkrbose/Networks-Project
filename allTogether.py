@@ -51,7 +51,7 @@ class Server:
 
                 frame = master.videofeed.set_frame(frame)
                 # Specify choice for Filter here
-                frame = get_Frame(frame, 3)
+                frame = get_Frame(frame, master.videoMode)
                 image = ImageTk.PhotoImage(Image.fromarray(frame))
 
                 if master.vidPanel is None:
@@ -96,7 +96,7 @@ class Client:
 
                 frame = master.videofeed.set_frame(frame)
                 # Specify choice for Filter here
-                frame = get_Frame(frame, 3)
+                frame = get_Frame(frame, master.videoMode)
                 image = ImageTk.PhotoImage(Image.fromarray(frame))
 
                 if master.vidPanel is None: # first frame
