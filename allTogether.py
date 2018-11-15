@@ -104,12 +104,15 @@ class Master:
     def __init__(self, sIP):
         print ('GALU')
         self.dummyIP = sIP
-        self.dummmySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print (self.dummyIP)
+        self.dummySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # print (self.dummyIP)
         try:
-            self.dummySocket.connect((self.dummyIP,6000))
+            self.dummySocket.connect((self.dummyIP,7000))
+            pass
         except:
             print "Server Port/IP unavailable/incorrect"
+
+        # self.dummySocket = ''
         
         # Tk Stuff
         self.root = tk.Tk() # Declares root as the tkinter main window
@@ -169,10 +172,14 @@ class Master:
         self.button_connect.pack()
         self.vidWindow.deiconify()
 
+        # Send CONNECTME to dummyserver
+        msg = "CONNECTME," + self.email
+        self.dummySocket.send(msg.encode('utf-8'))
+
     def authenticate_email(self):
-        email = self.entry_email.get()
+        self.email = self.entry_email.get()
         pw = self.entry_pw.get()
-        if (auth.verify_mail(email,pw) == True): # Checks whether username and password are correct
+        if (auth.verify_mail(self.email,pw) == True): # Checks whether username and password are correct
             self.win_auth1.destroy() # Removes email window
             self.win_auth2.deiconify() # Unhides OTP window
             self.otp = auth.send_OTP(email)
@@ -208,12 +215,10 @@ class Master:
             tkMessageBox.showerror("Error", "Nobody there!")
 
 
-if __name__ == '__main__':
-    master = Master(sys.argv[1]) # send server IP
-    master.first_pages()
-    root = master.root
-    daemon = Daemon()
-    server = Server()
-    client = Client()
-
-    root.mainloop() # Starts the event loop for the main window
+master = Master(sys.argv[1]) # send server IP
+master.first_pages()
+root = master.root
+daemon = Daemon()
+# server = Server()
+# client = Client()
+# root.mainloop() # Starts the event loop for the main window
